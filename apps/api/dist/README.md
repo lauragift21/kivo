@@ -1,0 +1,1 @@
+This folder contains the built output assets for the worker "smart-invoicing-api" generated at 2026-01-06T15:26:35.723Z.

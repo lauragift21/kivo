@@ -1,0 +1,259 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Kivo Design System
+ * Brand: Clean. Simple. Professional.
+ * 
+ * Color Philosophy:
+ * - Black and white base for clarity
+ * - Subtle orange touches for warmth (not overwhelming)
+ * - No gradients - just clean design
+ */
+
+@layer base {
+  :root {
+    /* Kivo Light Theme - Black & White */
+    --background: 0 0% 100%;              /* Pure white */
+    --foreground: 0 0% 9%;                /* Near black */
+    
+    --card: 0 0% 100%;                    /* White cards */
+    --card-foreground: 0 0% 9%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 9%;
+    
+    --primary: 0 0% 9%;                   /* Black for primary */
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 0 0% 96%;                /* Light gray */
+    --secondary-foreground: 0 0% 9%;
+    
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;         /* Medium gray */
+    
+    --accent: 24 90% 50%;                 /* Slightly muted orange */
+    --accent-foreground: 0 0% 100%;
+    
+    --destructive: 0 84% 60%;             /* Red */
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 0 0% 90%;                   /* Light border */
+    --input: 0 0% 90%;
+    --ring: 0 0% 9%;                      /* Black ring for focus */
+    
+    --radius: 0.625rem;
+
+    /* Status Colors */
+    --status-draft: 0 0% 45%;             /* Gray */
+    --status-draft-bg: 0 0% 96%;
+    
+    --status-sent: 0 0% 9%;               /* Black */
+    --status-sent-bg: 0 0% 96%;
+    
+    --status-viewed: 220 13% 46%;         /* Slate */
+    --status-viewed-bg: 220 14% 96%;
+    
+    --status-overdue: 24 90% 50%;         /* Orange */
+    --status-overdue-bg: 24 100% 96%;
+    
+    --status-settled: 142 71% 45%;        /* Green */
+    --status-settled-bg: 142 76% 95%;
+    
+    --status-void: 0 0% 45%;              /* Gray */
+    --status-void-bg: 0 0% 96%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    letter-spacing: -0.011em;
+  }
+
+  /* Typography */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    letter-spacing: -0.025em;
+  }
+
+  h1 {
+    letter-spacing: -0.035em;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.35);
+}
+
+/* Focus visible - black ring */
+:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Kivo utility classes */
+@layer utilities {
+  /* Text styles */
+  .text-kivo-title {
+    @apply text-foreground font-semibold tracking-tight;
+  }
+  
+  .text-kivo-body {
+    @apply text-foreground/90;
+  }
+  
+  .text-kivo-muted {
+    @apply text-muted-foreground;
+  }
+
+  /* Scroll animation base state */
+  .animate-on-scroll {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .animate-on-scroll.animate-in {
+    animation: fade-in-up 0.6s ease-out forwards;
+  }
+
+  /* Staggered animation delays */
+  .animation-delay-100 {
+    animation-delay: 100ms;
+  }
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+  .animation-delay-500 {
+    animation-delay: 500ms;
+  }
+
+  /* Table row hover */
+  .table-row-hover {
+    @apply transition-colors duration-150 hover:bg-muted/50;
+  }
+
+  /* Icon container */
+  .icon-container {
+    @apply h-10 w-10 rounded-xl flex items-center justify-center transition-colors bg-secondary;
+  }
+
+  .icon-container-sm {
+    @apply h-8 w-8 rounded-lg flex items-center justify-center transition-colors bg-secondary;
+  }
+
+  .icon-container-lg {
+    @apply h-12 w-12 rounded-xl flex items-center justify-center transition-colors bg-secondary;
+  }
+
+  /* Feature card */
+  .feature-card {
+    @apply p-6 rounded-xl border bg-card transition-all duration-200 hover:shadow-md;
+  }
+
+  /* Stat card */
+  .stat-card {
+    @apply relative overflow-hidden rounded-xl border bg-card p-6;
+  }
+
+  /* Subtle focus ring for form inputs */
+  .input-focus {
+    @apply focus:ring-2 focus:ring-foreground/10 focus:border-foreground/20;
+  }
+}
+
+/* Keyframe animations */
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-from-right {
+  0% {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-from-bottom {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes scale-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

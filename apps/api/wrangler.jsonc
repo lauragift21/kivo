@@ -1,0 +1,54 @@
+{
+  "name": "kivo-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2024-01-15",
+  "compatibility_flags": ["nodejs_compat"],
+  
+  // D1 Database
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "kivo-db",
+      "database_id": "c37a2427-9210-46f6-b2aa-293f0629947b"
+    }
+  ],
+  
+  // R2 Bucket for PDF storage
+  "r2_buckets": [
+    {
+      "binding": "STORAGE",
+      "bucket_name": "kivo-storage"
+    }
+  ],
+  
+  // Durable Objects for reminder scheduling
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "REMINDER_SCHEDULER",
+        "class_name": "ReminderScheduler"
+      }
+    ]
+  },
+  
+  // Cron Triggers for periodic reconciliation
+  "triggers": {
+    "crons": ["*/5 * * * *"]
+  },
+  
+  // Environment variables (set via wrangler secret)
+  "vars": {
+    "ENVIRONMENT": "development",
+    "FRONTEND_URL": "http://localhost:5173",
+    "API_URL": "http://localhost:8787",
+    "FROM_EMAIL": "onboarding@resend.dev"
+  },
+  
+  // Migrations for Durable Objects
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_classes": ["ReminderScheduler"]
+    }
+  ]
+}
