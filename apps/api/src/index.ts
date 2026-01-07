@@ -17,6 +17,32 @@ export { ReminderScheduler } from './durable-objects/reminder-scheduler';
 
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
 
+// Global error handler (must come before routes)
+app.onError((err, c) => {
+  const requestId = c.get('requestId') || 'unknown';
+  const appErr = err as Error & { code?: string; statusCode?: number; details?: unknown };
+  
+  if (appErr.statusCode && appErr.code) {
+    return c.json({
+      error: {
+        code: appErr.code,
+        message: appErr.message,
+        details: appErr.details,
+      },
+      requestId,
+    }, appErr.statusCode as 400 | 401 | 403 | 404 | 409 | 429 | 500 | 502);
+  }
+  
+  const isDevelopment = c.env.ENVIRONMENT === 'development';
+  return c.json({
+    error: {
+      code: 'INTERNAL_ERROR',
+      message: isDevelopment ? err.message : 'An unexpected error occurred',
+    },
+    requestId,
+  }, 500);
+});
+
 // Global middleware
 app.use('*', requestIdMiddleware);
 app.use('*', errorHandlerMiddleware);

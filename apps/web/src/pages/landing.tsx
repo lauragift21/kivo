@@ -134,9 +134,10 @@ function Logo({ className }: { className?: string }) {
   return (
     <div className={className}>
       <div className="flex items-center gap-2.5">
-        <div className="w-9 h-9 bg-foreground rounded-xl flex items-center justify-center">
-          <FileText className="h-4.5 w-4.5 text-background" />
-        </div>
+        <svg width="36" height="36" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="32" height="32" rx="6" fill="currentColor" className="text-foreground"/>
+          <path d="M9 10h14M9 16h10M9 22h8" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+        </svg>
         <span className="text-xl font-semibold tracking-tight">Kivo</span>
       </div>
     </div>
@@ -527,13 +528,13 @@ function HowItWorksSection() {
                     {/* Card */}
                     <div className={`relative p-6 rounded-2xl border h-full transition-all duration-300 ${
                       step.isLast 
-                        ? 'bg-accent border-accent text-white hover:bg-accent/90' 
+                        ? 'bg-foreground border-foreground text-white hover:bg-foreground/90' 
                         : 'bg-background border-border hover:shadow-md hover:-translate-y-1'
                     }`}>
                       {/* Step number badge */}
                       <div className={`absolute -top-3 -left-2 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold z-10 ${
                         step.isLast
-                          ? 'bg-white text-accent'
+                          ? 'bg-white text-foreground'
                           : 'bg-foreground text-background'
                       }`}>
                         {step.number}
@@ -577,7 +578,7 @@ function HowItWorksSection() {
                 {/* Number circle */}
                 <div className={`absolute left-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
                   step.isLast
-                    ? 'bg-accent text-white'
+                    ? 'bg-foreground text-white'
                     : 'bg-foreground text-background'
                 }`}>
                   {step.number}
@@ -586,7 +587,7 @@ function HowItWorksSection() {
                 {/* Content card */}
                 <div className={`p-4 rounded-xl border ${
                   step.isLast 
-                    ? 'bg-accent border-accent text-white' 
+                    ? 'bg-foreground border-foreground text-white' 
                     : 'bg-background border-border'
                 }`}>
                   <div className="flex items-center gap-3 mb-2">

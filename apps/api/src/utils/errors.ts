@@ -7,6 +7,7 @@ export class AppError extends Error {
   ) {
     super(message);
     this.name = 'AppError';
+    Object.setPrototypeOf(this, new.target.prototype);
   }
 }
 
@@ -57,27 +58,4 @@ export class ExternalServiceError extends AppError {
     super('EXTERNAL_SERVICE_ERROR', `${service}: ${message}`, 502);
     this.name = 'ExternalServiceError';
   }
-}
-
-export function formatErrorResponse(error: AppError | Error, requestId: string, isDevelopment: boolean = false) {
-  if (error instanceof AppError) {
-    return {
-      error: {
-        code: error.code,
-        message: error.message,
-        details: error.details,
-      },
-      requestId,
-    };
-  }
-  
-  // In development, show the actual error message for debugging
-  return {
-    error: {
-      code: 'INTERNAL_ERROR',
-      message: isDevelopment ? error.message : 'An unexpected error occurred',
-      ...(isDevelopment && { stack: error.stack }),
-    },
-    requestId,
-  };
 }
