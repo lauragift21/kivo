@@ -257,3 +257,73 @@
     transform: scale(1);
   }
 }
+
+/* Notification slide-in animation */
+@keyframes slide-in-notification {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Pulse animation for status dots */
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Check bounce animation */
+@keyframes check-bounce {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Landing page specific utilities */
+@layer utilities {
+  /* Animated notification - delayed slide in */
+  .animate-notification {
+    opacity: 0;
+    animation: slide-in-notification 0.4s ease-out 1.5s forwards;
+  }
+
+  /* Pulse animation for status indicators */
+  .animate-pulse-subtle {
+    animation: pulse-subtle 2s ease-in-out infinite;
+  }
+
+  /* Card lift hover effect */
+  .card-lift {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-lg;
+  }
+
+  /* Dot pattern background */
+  .dot-pattern {
+    background-image: radial-gradient(circle, hsl(var(--border)) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* Modal scale-in animation */
+  .animate-scale-in {
+    animation: scale-in 0.2s ease-out forwards;
+  }
+
+  /* Dashed line for connectors */
+  .dashed-line {
+    border-top: 2px dashed hsl(var(--border));
+  }
+}
