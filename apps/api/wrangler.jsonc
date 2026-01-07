@@ -1,8 +1,14 @@
 {
-  "name": "kivo-api",
+  "name": "kivo",
   "main": "src/index.ts",
   "compatibility_date": "2024-01-15",
   "compatibility_flags": ["nodejs_compat"],
+  
+  // Static assets (web frontend)
+  "assets": {
+    "directory": "../web/dist",
+    "binding": "ASSETS"
+  },
   
   // D1 Database
   "d1_databases": [
@@ -38,10 +44,10 @@
   
   // Environment variables (set via wrangler secret)
   "vars": {
-    "ENVIRONMENT": "development",
-    "FRONTEND_URL": "http://localhost:5173",
-    "API_URL": "http://localhost:8787",
-    "FROM_EMAIL": "onboarding@resend.dev"
+    "ENVIRONMENT": "production",
+    "FRONTEND_URL": "https://kivo.lauragift.workers.dev",
+    "API_URL": "https://kivo.lauragift.workers.dev",
+    "FROM_EMAIL": "noreply@thegiftcode.dev"
   },
   
   // Migrations for Durable Objects

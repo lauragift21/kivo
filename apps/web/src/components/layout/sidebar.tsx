@@ -11,6 +11,7 @@ import {
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Logo } from '@/components/ui/logo';
 import { useAuth } from '@/lib/auth';
 
 /**
@@ -73,11 +74,8 @@ export function Sidebar() {
         <div className="flex flex-col h-full">
           {/* Kivo Logo */}
           <div className="flex items-center h-16 px-6 border-b">
-            <Link to="/dashboard" className="flex items-center gap-3" onClick={() => setMobileOpen(false)}>
-              <div className="w-8 h-8 bg-foreground rounded-lg flex items-center justify-center">
-                <span className="text-background font-medium text-sm">K</span>
-              </div>
-              <span className="font-medium text-foreground tracking-tight">Kivo</span>
+            <Link to="/dashboard" onClick={() => setMobileOpen(false)}>
+              <Logo size="sm" />
             </Link>
           </div>
 

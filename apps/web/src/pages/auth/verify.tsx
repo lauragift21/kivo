@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useEffect, useState, useRef } from 'react';
+import { useSearch } from '@tanstack/react-router';
 import { FileText, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,12 +9,16 @@ export function VerifyPage() {
   const [error, setError] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState(true);
   const { verify } = useAuth();
-  const navigate = useNavigate();
   const search = useSearch({ from: '/auth/verify' });
   const token = (search as any).token;
+  const hasVerified = useRef(false);
 
   useEffect(() => {
     const verifyToken = async () => {
+      // Prevent double verification
+      if (hasVerified.current) return;
+      hasVerified.current = true;
+
       if (!token) {
         setError('Missing verification token');
         setIsVerifying(false);
@@ -23,7 +27,8 @@ export function VerifyPage() {
 
       try {
         await verify(token);
-        navigate({ to: '/dashboard' });
+        // Use window.location for a full page navigation to ensure auth state is fresh
+        window.location.href = '/dashboard';
       } catch (err: any) {
         setError(err.message || 'Failed to verify token');
         setIsVerifying(false);
@@ -31,7 +36,7 @@ export function VerifyPage() {
     };
 
     verifyToken();
-  }, [token, verify, navigate]);
+  }, [token, verify]);
 
   if (isVerifying) {
     return (
@@ -67,7 +72,7 @@ export function VerifyPage() {
             <p className="text-sm text-muted-foreground text-center">
               The link may have expired or already been used. Please request a new sign-in link.
             </p>
-            <Button className="w-full" onClick={() => navigate({ to: '/auth/signin' })}>
+            <Button className="w-full" onClick={() => window.location.href = '/auth/signin'}>
               Back to sign in
             </Button>
           </CardContent>

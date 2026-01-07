@@ -596,10 +596,10 @@ invoices.post('/:id/pdf', async (c) => {
 
 /**
  * Get PDF download URL
+ * Supports both Authorization header and query param token for direct browser access
  */
 invoices.get('/:id/pdf', async (c) => {
   const userId = c.get('userId')!;
-  const requestId = c.get('requestId');
   const invoiceId = c.req.param('id');
 
   const invoice = await c.env.DB.prepare(

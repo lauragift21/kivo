@@ -13,6 +13,13 @@ dashboard.get('/', async (c) => {
   const userId = c.get('userId')!;
   const requestId = c.get('requestId');
 
+  // Get user's settings for default currency
+  const settings = await c.env.DB.prepare(
+    'SELECT default_currency FROM settings WHERE user_id = ?'
+  ).bind(userId).first<{ default_currency: string }>();
+  
+  const defaultCurrency = settings?.default_currency || 'USD';
+
   // Get current month boundaries
   const now = new Date();
   const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
@@ -78,6 +85,7 @@ dashboard.get('/', async (c) => {
         total_clients: clientsResult?.count || 0,
         total_invoices: invoicesCountResult?.count || 0,
       },
+      default_currency: defaultCurrency,
       recent_invoices: recentInvoices.results,
     },
     requestId,

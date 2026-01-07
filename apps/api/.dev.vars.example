@@ -1,0 +1,9 @@
+# Copy this file to .dev.vars and fill in your values
+# DO NOT commit .dev.vars - it contains secrets
+
+JWT_SECRET=your-jwt-secret-here
+RESEND_API_KEY=re_your_resend_api_key
+STRIPE_SECRET_KEY=sk_test_your_stripe_key
+STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
+FRONTEND_URL=http://localhost:5173
+API_URL=http://localhost:8787

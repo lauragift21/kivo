@@ -75,7 +75,6 @@ export function DashboardPage() {
         }
       />
 
-      {/* KPI Cards - Mollie-inspired with icons and better hierarchy */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
         <Card className="relative overflow-hidden">
           <CardContent className="p-6">
@@ -86,7 +85,7 @@ export function DashboardPage() {
                   <Skeleton className="h-8 w-28" />
                 ) : (
                   <p className="text-2xl font-bold tracking-tight">
-                    {formatCurrency(data?.kpis.total_outstanding || 0, 'USD')}
+                    {formatCurrency(data?.kpis.total_outstanding || 0, data?.default_currency || 'USD')}
                   </p>
                 )}
                 <p className="text-xs text-muted-foreground mt-1">Unpaid invoices</p>
@@ -107,7 +106,7 @@ export function DashboardPage() {
                   <Skeleton className="h-8 w-28" />
                 ) : (
                   <p className="text-2xl font-bold tracking-tight text-status-settled">
-                    {formatCurrency(data?.kpis.total_paid_this_month || 0, 'USD')}
+                    {formatCurrency(data?.kpis.total_paid_this_month || 0, data?.default_currency || 'USD')}
                   </p>
                 )}
                 <p className="text-xs text-muted-foreground mt-1">Revenue collected</p>

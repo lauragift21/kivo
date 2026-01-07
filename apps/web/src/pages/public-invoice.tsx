@@ -1,7 +1,6 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useParams, useSearch } from '@tanstack/react-router';
 import {
-  FileText,
   Download,
   CreditCard,
   CheckCircle,
@@ -13,6 +12,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Logo } from '@/components/ui/logo';
 import { publicApi } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 
@@ -105,9 +105,7 @@ export function PublicInvoicePage() {
           <CardHeader className="border-b">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                  <FileText className="h-5 w-5 text-primary-foreground" />
-                </div>
+                <Logo size="md" showText={false} />
                 <div>
                   <h1 className="text-xl font-semibold">{business.name || 'Invoice'}</h1>
                   <p className="text-sm text-muted-foreground">{invoice.invoice_number}</p>

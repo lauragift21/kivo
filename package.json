@@ -13,7 +13,7 @@
     "build": "npm run build -w packages/shared && npm run build -w apps/api && npm run build -w apps/web",
     "build:api": "npm run build -w apps/api",
     "build:web": "npm run build -w apps/web",
-    "deploy": "npm run deploy -w apps/api",
+    "deploy": "npm run build -w packages/shared && npm run deploy -w apps/api",
     "db:migrate": "npm run db:migrate -w apps/api",
     "db:seed": "npm run db:seed -w apps/api",
     "test": "npm run test --workspaces --if-present",

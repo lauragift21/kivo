@@ -3,11 +3,12 @@ import { Link } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { FileText, Loader2, Mail } from 'lucide-react';
+import { Loader2, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Logo } from '@/components/ui/logo';
 import { useAuth } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 
@@ -79,8 +80,8 @@ export function SignUpPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto w-12 h-12 bg-primary rounded-lg flex items-center justify-center mb-4">
-            <FileText className="h-6 w-6 text-primary-foreground" />
+          <div className="mx-auto mb-4">
+            <Logo size="lg" />
           </div>
           <CardTitle>Create your account</CardTitle>
           <CardDescription>Start invoicing your clients in minutes</CardDescription>

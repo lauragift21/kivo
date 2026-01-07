@@ -67,18 +67,27 @@ app.route('/api/webhooks', webhooks);
 app.route('/api/dashboard', dashboard);
 app.route('/api/settings', settings);
 
-// 404 handler
+// 404 handler for API routes only
 app.notFound((c) => {
-  return c.json(
-    {
-      error: {
-        code: 'NOT_FOUND',
-        message: 'The requested resource was not found',
+  const url = new URL(c.req.url);
+  
+  // Only return JSON 404 for /api/* routes
+  if (url.pathname.startsWith('/api/')) {
+    return c.json(
+      {
+        error: {
+          code: 'NOT_FOUND',
+          message: 'The requested resource was not found',
+        },
+        requestId: c.get('requestId'),
       },
-      requestId: c.get('requestId'),
-    },
-    404
-  );
+      404
+    );
+  }
+  
+  // For non-API routes, this shouldn't be reached as static assets handle them
+  // But as a fallback, serve index.html for SPA routing
+  return c.env.ASSETS.fetch(new Request(new URL('/index.html', c.req.url), c.req.raw));
 });
 
 // Cron trigger handler for periodic reconciliation

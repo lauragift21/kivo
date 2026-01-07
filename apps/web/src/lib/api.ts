@@ -255,7 +255,8 @@ export const invoicesApi = {
   },
 
   getPdfUrl: (id: string): string => {
-    return `${API_BASE}/invoices/${id}/pdf`;
+    const token = localStorage.getItem('auth_token');
+    return `${API_BASE}/invoices/${id}/pdf${token ? `?token=${token}` : ''}`;
   },
 };
 

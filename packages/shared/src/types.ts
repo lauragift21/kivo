@@ -124,6 +124,7 @@ export interface RecentInvoice {
 
 export interface DashboardData {
   kpis: DashboardKPIs;
+  default_currency: Currency;
   recent_invoices: RecentInvoice[];
 }
 

@@ -14,13 +14,23 @@ export const authMiddleware = createMiddleware<{
   Bindings: Env;
   Variables: Variables;
 }>(async (c, next) => {
-  const authHeader = c.req.header('Authorization');
+  let token: string | null = null;
   
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    throw new AuthenticationError('Missing or invalid authorization header');
+  // Check Authorization header first
+  const authHeader = c.req.header('Authorization');
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.slice(7);
+  }
+  
+  // Fall back to query param token (for direct browser access like PDF viewing)
+  if (!token) {
+    token = c.req.query('token') || null;
+  }
+  
+  if (!token) {
+    throw new AuthenticationError('Missing or invalid authorization');
   }
 
-  const token = authHeader.slice(7);
   const payload = await verifyJWT<JWTPayload>(token, c.env.JWT_SECRET);
   
   if (!payload) {

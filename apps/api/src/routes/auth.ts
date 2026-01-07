@@ -62,27 +62,7 @@ auth.post('/signup', async (c) => {
        VALUES (?, ?, ?, ?, ?, ?)`
     ).bind(tokenId, userId, email, token, expiresAt, now).run();
 
-    // In development mode, skip email and return the magic link directly
-    const isDevelopment = c.env.ENVIRONMENT === 'development';
-    
-    if (isDevelopment) {
-      const magicLink = `${c.env.FRONTEND_URL}/auth/verify?token=${token}`;
-      console.log(`[DEV] Magic link for ${email}: ${magicLink}`);
-      
-      return c.json({
-        data: {
-          message: 'Check your email for a sign-in link',
-          // Only include in dev mode for testing
-          _dev: {
-            magicLink,
-            note: 'This is only shown in development mode',
-          },
-        },
-        requestId,
-      });
-    }
-
-    // Send magic link email in production
+    // Always send magic link email
     const emailService = new EmailService(c.env.RESEND_API_KEY, c.env.FROM_EMAIL);
     await emailService.sendMagicLink(email, token, c.env.FRONTEND_URL);
 
@@ -139,27 +119,7 @@ auth.post('/signin', async (c) => {
      VALUES (?, ?, ?, ?, ?, ?)`
   ).bind(tokenId, user.id, email, token, expiresAt, now).run();
 
-  // In development mode, skip email and return the magic link directly
-  const isDevelopment = c.env.ENVIRONMENT === 'development';
-  
-  if (isDevelopment) {
-    const magicLink = `${c.env.FRONTEND_URL}/auth/verify?token=${token}`;
-    console.log(`[DEV] Magic link for ${email}: ${magicLink}`);
-    
-    return c.json({
-      data: {
-        message: 'If an account exists, check your email for a sign-in link',
-        // Only include in dev mode for testing
-        _dev: {
-          magicLink,
-          note: 'This is only shown in development mode',
-        },
-      },
-      requestId,
-    });
-  }
-
-  // Send magic link email in production
+  // Always send magic link email
   const emailService = new EmailService(c.env.RESEND_API_KEY, c.env.FROM_EMAIL);
   await emailService.sendMagicLink(email, token, c.env.FRONTEND_URL);
 

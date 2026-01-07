@@ -30,11 +30,25 @@ Modern invoicing for freelancers and independent creators. Built on the Cloudfla
 ```
 kivo/
 ├── apps/
-│   ├── api/          # Cloudflare Workers backend (Hono)
+│   ├── api/          # Cloudflare Workers backend (Hono) + static assets
 │   └── web/          # React frontend (Vite + TanStack)
 └── packages/
     └── shared/       # Shared types and utilities
 ```
+
+### Deployment Architecture
+
+Kivo deploys as a **single Cloudflare Worker** that serves both the API and frontend:
+
+- `/api/*` → Hono API routes
+- `/health` → Health check endpoint
+- `/*` → Static assets (React SPA)
+
+This unified deployment provides:
+- Single URL for the entire application
+- No CORS configuration needed (same origin)
+- Simplified deployment process
+- Reduced infrastructure complexity
 
 ### Tech Stack
 
@@ -45,6 +59,7 @@ kivo/
 - R2 for PDF/asset storage
 - Durable Objects for reminder scheduling
 - Cron Triggers for periodic reconciliation
+- Static Assets for serving the frontend
 
 **Frontend**
 - React + Vite
@@ -149,15 +164,27 @@ npm run dev
 
 ### 7. Deploy to Production
 
+Kivo deploys as a single Cloudflare Worker with static assets:
+
 ```bash
-# Build shared package
-npm run build -w packages/shared
+npm run deploy
+```
 
-# Deploy API to Cloudflare Workers
-npm run deploy -w apps/api
+This command will:
+1. Build the shared package
+2. Build the web frontend to `apps/web/dist`
+3. Deploy the combined worker (API + static assets) to Cloudflare
 
-# Build and deploy web (to Cloudflare Pages or your preferred host)
-npm run build -w apps/web
+Your app will be available at: `https://kivo.<your-subdomain>.workers.dev`
+
+**Update production environment variables** in `apps/api/wrangler.jsonc`:
+```jsonc
+"vars": {
+  "ENVIRONMENT": "production",
+  "FRONTEND_URL": "https://kivo.<your-subdomain>.workers.dev",
+  "API_URL": "https://kivo.<your-subdomain>.workers.dev",
+  "FROM_EMAIL": "your-verified-email@domain.com"
+}
 ```
 
 ## Environment Variables
@@ -175,7 +202,7 @@ npm run build -w apps/web
 
 ### Web (Frontend)
 
-The frontend proxies API requests in development. For production, configure your build to point to the correct API URL.
+The frontend proxies API requests to `/api` in development. In production, both frontend and API are served from the same worker, so no additional configuration is needed.
 
 ## Demo Flow
 

@@ -15,6 +15,7 @@ import {
   Play,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Logo } from '@/components/ui/logo';
 
 /**
  * Kivo Landing Page
@@ -130,19 +131,7 @@ function VideoModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
   );
 }
 
-function Logo({ className }: { className?: string }) {
-  return (
-    <div className={className}>
-      <div className="flex items-center gap-2.5">
-        <svg width="36" height="36" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="32" height="32" rx="6" fill="currentColor" className="text-foreground"/>
-          <path d="M9 10h14M9 16h10M9 22h8" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-        </svg>
-        <span className="text-xl font-semibold tracking-tight">Kivo</span>
-      </div>
-    </div>
-  );
-}
+
 
 function Header() {
   return (
