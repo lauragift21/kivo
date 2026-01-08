@@ -3,13 +3,11 @@
 @tailwind utilities;
 
 /*
- * Kivo Design System
- * Brand: Clean. Simple. Professional.
+ * Kivo Design System - Editorial Black & White
  * 
- * Color Philosophy:
- * - Black and white base for clarity
- * - Subtle orange touches for warmth (not overwhelming)
- * - No gradients - just clean design
+ * Aesthetic: Magazine-quality, sophisticated, premium
+ * Typography: Instrument Serif (display) + Geist (body)
+ * Colors: Pure black & white with subtle orange accent
  */
 
 @layer base {
@@ -33,7 +31,7 @@
     --muted: 0 0% 96%;
     --muted-foreground: 0 0% 45%;         /* Medium gray */
     
-    --accent: 24 90% 50%;                 /* Slightly muted orange */
+    --accent: 24 90% 50%;                 /* Subtle orange */
     --accent-foreground: 0 0% 100%;
     
     --destructive: 0 84% 60%;             /* Red */
@@ -43,25 +41,25 @@
     --input: 0 0% 90%;
     --ring: 0 0% 9%;                      /* Black ring for focus */
     
-    --radius: 0.625rem;
+    --radius: 0.75rem;
 
     /* Status Colors */
-    --status-draft: 0 0% 45%;             /* Gray */
+    --status-draft: 0 0% 45%;
     --status-draft-bg: 0 0% 96%;
     
-    --status-sent: 0 0% 9%;               /* Black */
+    --status-sent: 0 0% 9%;
     --status-sent-bg: 0 0% 96%;
     
-    --status-viewed: 220 13% 46%;         /* Slate */
+    --status-viewed: 220 13% 46%;
     --status-viewed-bg: 220 14% 96%;
     
-    --status-overdue: 24 90% 50%;         /* Orange */
+    --status-overdue: 24 90% 50%;
     --status-overdue-bg: 24 100% 96%;
     
-    --status-settled: 142 71% 45%;        /* Green */
+    --status-settled: 142 71% 45%;
     --status-settled-bg: 142 76% 95%;
     
-    --status-void: 0 0% 45%;              /* Gray */
+    --status-void: 0 0% 45%;
     --status-void-bg: 0 0% 96%;
   }
 }
@@ -74,11 +72,12 @@
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
   }
   
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Geist Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     letter-spacing: -0.011em;
   }
@@ -91,6 +90,12 @@
 
   h1 {
     letter-spacing: -0.035em;
+  }
+
+  /* Serif headlines for editorial feel */
+  .font-serif {
+    font-family: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+    font-weight: 400;
   }
 }
 
@@ -113,7 +118,7 @@
   background: hsl(var(--muted-foreground) / 0.35);
 }
 
-/* Focus visible - black ring */
+/* Focus visible */
 :focus-visible {
   outline: 2px solid hsl(var(--ring));
   outline-offset: 2px;
@@ -137,29 +142,20 @@
   /* Scroll animation base state */
   .animate-on-scroll {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(24px);
   }
 
   .animate-on-scroll.animate-in {
-    animation: fade-in-up 0.6s ease-out forwards;
+    animation: fade-in-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
 
   /* Staggered animation delays */
-  .animation-delay-100 {
-    animation-delay: 100ms;
-  }
-  .animation-delay-200 {
-    animation-delay: 200ms;
-  }
-  .animation-delay-300 {
-    animation-delay: 300ms;
-  }
-  .animation-delay-400 {
-    animation-delay: 400ms;
-  }
-  .animation-delay-500 {
-    animation-delay: 500ms;
-  }
+  .animation-delay-100 { animation-delay: 100ms; }
+  .animation-delay-200 { animation-delay: 200ms; }
+  .animation-delay-300 { animation-delay: 300ms; }
+  .animation-delay-400 { animation-delay: 400ms; }
+  .animation-delay-500 { animation-delay: 500ms; }
+  .animation-delay-600 { animation-delay: 600ms; }
 
   /* Table row hover */
   .table-row-hover {
@@ -193,13 +189,86 @@
   .input-focus {
     @apply focus:ring-2 focus:ring-foreground/10 focus:border-foreground/20;
   }
+
+  /* Card lift hover effect */
+  .card-lift {
+    @apply transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl;
+  }
+
+  /* Card with subtle border animation on hover */
+  .card-hover-border {
+    @apply relative transition-all duration-300;
+  }
+  
+  .card-hover-border::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: hsl(var(--foreground));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+  
+  .card-hover-border:hover::after {
+    transform: scaleX(1);
+  }
+
+  /* Dot pattern background */
+  .dot-pattern {
+    background-image: radial-gradient(circle, hsl(var(--foreground) / 0.08) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* Grid pattern */
+  .grid-pattern {
+    background-image: 
+      linear-gradient(hsl(var(--foreground) / 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--foreground) / 0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  /* Animated notification */
+  .animate-notification {
+    opacity: 0;
+    animation: slide-in-notification 0.5s cubic-bezier(0.22, 1, 0.36, 1) 1.5s forwards;
+  }
+
+  /* Pulse animation for status indicators */
+  .animate-pulse-subtle {
+    animation: pulse-subtle 2.5s ease-in-out infinite;
+  }
+
+  /* Float animation */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  /* Modal scale-in */
+  .animate-scale-in {
+    animation: scale-in 0.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  /* Dashed line for connectors */
+  .dashed-line {
+    border-top: 2px dashed hsl(var(--border));
+  }
+
+  /* Gradient blur backgrounds */
+  .gradient-blur {
+    filter: blur(100px);
+    opacity: 0.5;
+  }
 }
 
 /* Keyframe animations */
 @keyframes fade-in-up {
   0% {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(24px);
   }
   100% {
     opacity: 1;
@@ -208,18 +277,14 @@
 }
 
 @keyframes fade-in {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
+  0% { opacity: 0; }
+  100% { opacity: 1; }
 }
 
 @keyframes slide-in-from-right {
   0% {
     opacity: 0;
-    transform: translateX(10px);
+    transform: translateX(20px);
   }
   100% {
     opacity: 1;
@@ -243,7 +308,7 @@
     transform: translateY(0px);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-12px);
   }
 }
 
@@ -258,72 +323,24 @@
   }
 }
 
-/* Notification slide-in animation */
 @keyframes slide-in-notification {
   0% {
     opacity: 0;
-    transform: translateY(10px) scale(0.95);
+    transform: translateX(20px) scale(0.95);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateX(0) scale(1);
   }
 }
 
-/* Pulse animation for status dots */
 @keyframes pulse-subtle {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
-/* Check bounce animation */
-@keyframes check-bounce {
-  0% {
-    transform: scale(0);
-  }
-  50% {
-    transform: scale(1.2);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-/* Landing page specific utilities */
-@layer utilities {
-  /* Animated notification - delayed slide in */
-  .animate-notification {
-    opacity: 0;
-    animation: slide-in-notification 0.4s ease-out 1.5s forwards;
-  }
-
-  /* Pulse animation for status indicators */
-  .animate-pulse-subtle {
-    animation: pulse-subtle 2s ease-in-out infinite;
-  }
-
-  /* Card lift hover effect */
-  .card-lift {
-    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-lg;
-  }
-
-  /* Dot pattern background */
-  .dot-pattern {
-    background-image: radial-gradient(circle, hsl(var(--border)) 1px, transparent 1px);
-    background-size: 24px 24px;
-  }
-
-  /* Modal scale-in animation */
-  .animate-scale-in {
-    animation: scale-in 0.2s ease-out forwards;
-  }
-
-  /* Dashed line for connectors */
-  .dashed-line {
-    border-top: 2px dashed hsl(var(--border));
-  }
+/* Selection styling */
+::selection {
+  background: hsl(var(--foreground) / 0.1);
+  color: hsl(var(--foreground));
 }

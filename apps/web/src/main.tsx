@@ -6,6 +6,14 @@ import { AuthProvider, useAuth } from '@/lib/auth';
 import { ThemeProvider } from '@/lib/theme';
 import { Toaster } from '@/components/ui/toaster';
 import { router } from './router';
+
+// Fontsource fonts - Editorial typography
+import '@fontsource/instrument-serif/400.css';
+import '@fontsource/geist-sans/400.css';
+import '@fontsource/geist-sans/500.css';
+import '@fontsource/geist-sans/600.css';
+import '@fontsource/geist-sans/700.css';
+
 import '@/styles/globals.css';
 
 const queryClient = new QueryClient({
