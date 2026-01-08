@@ -232,63 +232,6 @@ The frontend proxies API requests to `/api` in development. In production, both 
 8. **Payment**: Client pays via Stripe Checkout
 9. **Confirmation**: Both parties receive email confirmations
 
-## API Endpoints
-
-### Auth
-- `POST /api/auth/signup` - Create account
-- `POST /api/auth/signin` - Request magic link
-- `POST /api/auth/verify` - Verify magic link token
-- `GET /api/auth/me` - Get current user
-
-### Clients
-- `GET /api/clients` - List clients
-- `GET /api/clients/:id` - Get client
-- `POST /api/clients` - Create client
-- `PATCH /api/clients/:id` - Update client
-- `DELETE /api/clients/:id` - Archive client
-- `POST /api/clients/:id/restore` - Restore client
-
-### Invoices
-- `GET /api/invoices` - List invoices (with filters)
-- `GET /api/invoices/:id` - Get invoice with details
-- `POST /api/invoices` - Create invoice
-- `PATCH /api/invoices/:id` - Update invoice
-- `POST /api/invoices/:id/send` - Send to client
-- `POST /api/invoices/:id/duplicate` - Duplicate invoice
-- `POST /api/invoices/:id/pdf` - Generate PDF
-- `GET /api/invoices/:id/pdf` - Download PDF
-
-### Public (No Auth)
-- `GET /api/public/invoice/:token` - View public invoice
-- `POST /api/public/invoice/:token/pay` - Initiate payment
-
-### Dashboard
-- `GET /api/dashboard` - Get KPIs and recent invoices
-- `GET /api/dashboard/stats` - Get statistics
-
-### Settings
-- `GET /api/settings` - Get user settings
-- `PATCH /api/settings` - Update settings
-- `POST /api/settings/logo` - Upload logo
-- `DELETE /api/settings/logo` - Remove logo
-
-### Webhooks
-- `POST /api/webhooks/stripe` - Stripe webhook handler
-
-## Database Schema
-
-See `apps/api/migrations/001_initial.sql` for the complete schema including:
-
-- `users` - User accounts
-- `magic_link_tokens` - Authentication tokens
-- `clients` - Client records
-- `invoices` - Invoice headers
-- `invoice_items` - Line items
-- `invoice_events` - Status history
-- `invoice_public_tokens` - Secure public links
-- `payments` - Payment records
-- `settings` - User preferences
-
 ## Testing
 
 ```bash
