@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef } from 'react';
-import { useSearch } from '@tanstack/react-router';
 import { FileText, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,8 +8,9 @@ export function VerifyPage() {
   const [error, setError] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState(true);
   const { verify } = useAuth();
-  const search = useSearch({ from: '/auth/verify' });
-  const token = (search as any).token;
+  
+  // Get token directly from URL search params to avoid TanStack Router issues
+  const token = new URLSearchParams(window.location.search).get('token');
   const hasVerified = useRef(false);
 
   useEffect(() => {
