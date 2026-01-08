@@ -57,12 +57,9 @@ const signUpRoute = createRoute({
 });
 
 const verifyRoute = createRoute({
-  getParentRoute: () => authRoute,
-  path: 'verify',
+  getParentRoute: () => rootRoute,
+  path: 'auth/verify',
   component: VerifyPage,
-  validateSearch: (search: Record<string, unknown>) => ({
-    token: (search.token as string) || '',
-  }),
 });
 
 // Landing page (public)
@@ -186,7 +183,8 @@ const routeTree = rootRoute.addChildren([
   landingRoute,
   privacyRoute,
   termsRoute,
-  authRoute.addChildren([signInRoute, signUpRoute, verifyRoute]),
+  verifyRoute,
+  authRoute.addChildren([signInRoute, signUpRoute]),
   publicInvoiceRoute,
   protectedRoute.addChildren([
     dashboardRoute,
