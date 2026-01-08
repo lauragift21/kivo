@@ -2,6 +2,8 @@
 
 Modern invoicing for freelancers and independent creators. Built on the Cloudflare developer platform.
 
+![Kivo Demo](docs/screenshots/kivo.gif)
+
 ## Features
 
 - **Authentication**: Email magic link authentication (passwordless)
