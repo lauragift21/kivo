@@ -164,6 +164,24 @@ npm run dev
 
 ### 7. Deploy to Production
 
+#### Option A: Automatic Deployment (Recommended)
+
+The project includes a GitHub Actions workflow that automatically deploys to Cloudflare when you push to `main`.
+
+**Setup GitHub Secrets:**
+
+1. Go to your repository on GitHub → Settings → Secrets and variables → Actions
+2. Add these secrets:
+   - `CLOUDFLARE_API_TOKEN`: Create at [Cloudflare API Tokens](https://dash.cloudflare.com/profile/api-tokens) with "Edit Cloudflare Workers" permissions
+   - `CLOUDFLARE_ACCOUNT_ID`: Find in the Cloudflare dashboard URL or Workers overview page
+
+Once configured, every push to `main` will automatically:
+1. Build the shared package
+2. Build the web frontend
+3. Deploy to Cloudflare Workers
+
+#### Option B: Manual Deployment
+
 Kivo deploys as a single Cloudflare Worker with static assets:
 
 ```bash
