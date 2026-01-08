@@ -163,7 +163,7 @@ function Header() {
           >
             Sign in
           </Link>
-          <Button size="sm" className="rounded-full px-4" asChild>
+          <Button size="sm" className="rounded-full px-4 bg-foreground text-background hover:bg-foreground/90" asChild>
             <Link to="/auth/signup">Try free</Link>
           </Button>
         </div>
@@ -261,18 +261,18 @@ function HeroSection({ onViewDemo }: { onViewDemo: () => void }) {
             </h1>
             
             <p className="text-xl md:text-2xl text-muted-foreground mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-              Modern invoicing for freelancers and independent creators. Create, send, and track invoices—know exactly when work is settled.
+              Modern invoicing for freelancers and independent creators. Create, send, and track invoices, know exactly when work is settled.
             </p>
             
             {/* CTA buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-              <Button size="lg" className="rounded-full px-8" asChild>
+              <Button size="lg" className="rounded-full px-8 bg-foreground text-background hover:bg-foreground/90" asChild>
                 <Link to="/auth/signup">
                   Get started free
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              <Button variant="outline" size="lg" className="rounded-full px-6" onClick={onViewDemo}>
+              <Button variant="outline" size="lg" className="rounded-full px-6 border-foreground text-foreground hover:bg-foreground hover:text-background" onClick={onViewDemo}>
                 <Play className="mr-2 h-4 w-4" />
                 View demo
               </Button>
@@ -286,6 +286,11 @@ function HeroSection({ onViewDemo }: { onViewDemo: () => void }) {
         </div>
       </div>
 
+      {/* Scroll indicator */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-muted-foreground/50">
+        <span className="text-xs uppercase tracking-widest">Scroll</span>
+        <div className="w-px h-8 bg-gradient-to-b from-muted-foreground/30 to-transparent" />
+      </div>
     </section>
   );
 }
@@ -589,7 +594,7 @@ function CTASection({ onViewDemo }: { onViewDemo: () => void }) {
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
-              <Button size="lg" className="rounded-full px-8" asChild>
+              <Button size="lg" className="rounded-full px-8 bg-foreground text-background hover:bg-foreground/90" asChild>
                 <Link to="/auth/signup">
                   Get started free
                   <ArrowRight className="ml-2 h-5 w-5" />
