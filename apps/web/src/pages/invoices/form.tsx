@@ -119,9 +119,8 @@ export function InvoiceFormPage() {
       dueDate.setDate(dueDate.getDate() + days);
       setValue('due_date', dueDate.toISOString().split('T')[0]);
 
-      // Generate invoice number
-      const invoiceNumber = `${settings.invoice_prefix}-${settings.next_invoice_number.toString().padStart(5, '0')}`;
-      setValue('invoice_number', invoiceNumber);
+      // Don't set invoice_number for new invoices - let the backend generate it
+      // This ensures proper incrementing even with concurrent invoice creation
     }
   }, [settings, isEditing, setValue]);
 

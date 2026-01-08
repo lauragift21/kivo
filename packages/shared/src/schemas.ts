@@ -116,7 +116,7 @@ export const invoiceSchema = z.object({
 
 export const createInvoiceSchema = z.object({
   client_id: z.string().uuid('Invalid client ID'),
-  invoice_number: z.string().min(1, 'Invoice number is required').max(50),
+  invoice_number: z.string().max(50).optional(), // Optional - backend generates if not provided
   issue_date: z.string(),
   due_date: z.string(),
   currency: currencySchema,

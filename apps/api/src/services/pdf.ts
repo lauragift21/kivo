@@ -90,7 +90,7 @@ export class PDFService {
     .invoice-number {
       font-size: 28px;
       font-weight: 700;
-      color: #2563eb;
+      color: #6366F1;
       margin-bottom: 8px;
     }
     

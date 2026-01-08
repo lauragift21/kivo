@@ -182,8 +182,8 @@ invoices.post('/', async (c) => {
   const invoiceId = generateUUID();
   const now = new Date().toISOString();
 
-  // Generate invoice number if not provided
-  let invoiceNumber = data.invoice_number;
+  // Generate invoice number if not provided or empty
+  let invoiceNumber = data.invoice_number?.trim();
   if (!invoiceNumber && settings) {
     invoiceNumber = generateInvoiceNumber(settings.invoice_prefix, settings.next_invoice_number);
     // Update next invoice number
