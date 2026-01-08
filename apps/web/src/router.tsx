@@ -1,4 +1,4 @@
-import { createRouter, createRoute, createRootRoute, Outlet } from '@tanstack/react-router';
+import { createRouter, createRoute, createRootRoute, Outlet, redirect } from '@tanstack/react-router';
 
 // Pages
 import { LandingPage } from '@/pages/landing';
@@ -31,12 +31,28 @@ const authRoute = createRoute({
 const signInRoute = createRoute({
   getParentRoute: () => authRoute,
   path: 'signin',
+  beforeLoad: ({ context }) => {
+    const { auth } = context as { auth: { isAuthenticated: boolean } };
+    if (auth.isAuthenticated) {
+      throw redirect({
+        to: '/dashboard',
+      });
+    }
+  },
   component: SignInPage,
 });
 
 const signUpRoute = createRoute({
   getParentRoute: () => authRoute,
   path: 'signup',
+  beforeLoad: ({ context }) => {
+    const { auth } = context as { auth: { isAuthenticated: boolean } };
+    if (auth.isAuthenticated) {
+      throw redirect({
+        to: '/dashboard',
+      });
+    }
+  },
   component: SignUpPage,
 });
 
@@ -80,10 +96,18 @@ const publicInvoiceRoute = createRoute({
   }),
 });
 
-// Protected routes wrapper
+// Protected routes wrapper - redirects to signin if not authenticated
 const protectedRoute = createRoute({
   getParentRoute: () => rootRoute,
   id: 'protected',
+  beforeLoad: ({ context }) => {
+    const { auth } = context as { auth: { isAuthenticated: boolean } };
+    if (!auth.isAuthenticated) {
+      throw redirect({
+        to: '/auth/signin',
+      });
+    }
+  },
   component: () => <Outlet />,
 });
 
