@@ -8,7 +8,7 @@ import {
   generateInvoiceNumber,
 } from '@kivo/shared';
 import type { Invoice, InvoiceItem, InvoiceWithClient, Client, Settings } from '@kivo/shared';
-import { ValidationError, NotFoundError, ConflictError } from '../utils/errors';
+import { ValidationError, NotFoundError } from '../utils/errors';
 import { generateUUID, generateToken } from '../utils/crypto';
 import { authMiddleware } from '../middleware/auth';
 import { PDFService } from '../services/pdf';

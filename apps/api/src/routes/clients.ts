@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import type { Env, Variables } from '../types';
 import { createClientSchema, updateClientSchema } from '@kivo/shared';
 import type { Client } from '@kivo/shared';
-import { ValidationError, NotFoundError, AuthorizationError } from '../utils/errors';
+import { ValidationError, NotFoundError } from '../utils/errors';
 import { generateUUID } from '../utils/crypto';
 import { authMiddleware } from '../middleware/auth';
 import { AnalyticsService } from '../services/analytics';

@@ -243,7 +243,7 @@ export class ReminderScheduler implements DurableObject {
       // Get public token
       const publicToken = await this.env.DB.prepare(
         'SELECT token FROM invoice_public_tokens WHERE invoice_id = ?'
-      ).bind(invoiceId).first<{ token: string }>();
+      ).bind(invoiceId).first() as { token: string } | null;
 
       if (!publicToken) {
         return false;

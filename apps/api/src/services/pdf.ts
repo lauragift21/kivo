@@ -1,4 +1,4 @@
-import type { InvoiceWithClient, Settings, Currency } from '@kivo/shared';
+import type { InvoiceWithClient, Settings } from '@kivo/shared';
 import { formatCurrency, formatDateForTimezone } from '@kivo/shared';
 
 // Simple PDF generation for Workers environment
@@ -25,7 +25,7 @@ export class PDFService {
     // In production, you might want to use a headless browser API or a PDF service
     // For now, we'll store HTML that can be converted/printed to PDF
     const encoder = new TextEncoder();
-    return encoder.encode(html).buffer;
+    return encoder.encode(html).buffer as ArrayBuffer;
   }
 
   /**

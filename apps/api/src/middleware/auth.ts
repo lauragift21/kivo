@@ -4,7 +4,7 @@ import { verifyJWT } from '../utils/crypto';
 import { AuthenticationError } from '../utils/errors';
 import type { User } from '@kivo/shared';
 
-interface JWTPayload {
+interface JWTPayload extends Record<string, unknown> {
   sub: string;
   email: string;
   name: string;

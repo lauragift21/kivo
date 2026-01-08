@@ -135,11 +135,14 @@ settings.post('/logo', async (c) => {
   const requestId = c.get('requestId');
 
   const formData = await c.req.formData();
-  const file = formData.get('logo') as File;
+  const fileEntry = formData.get('logo');
 
-  if (!file) {
+  if (!fileEntry || typeof fileEntry === 'string') {
     throw new ValidationError('No logo file provided');
   }
+
+  // Cast to File - we've verified it's not a string above
+  const file = fileEntry as unknown as File;
 
   // Validate file type
   const allowedTypes = ['image/png', 'image/jpeg', 'image/svg+xml'];
