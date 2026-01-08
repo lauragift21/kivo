@@ -225,4 +225,24 @@ publicRoutes.post('/invoice/:token/pay', async (c) => {
   });
 });
 
+/**
+ * Get demo video
+ */
+publicRoutes.get('/demo-video', async (c) => {
+  const videoKey = 'demo/kivo-demo.mp4';
+  
+  const object = await c.env.STORAGE.get(videoKey);
+  
+  if (!object) {
+    throw new NotFoundError('Demo video');
+  }
+
+  const headers = new Headers();
+  headers.set('Content-Type', 'video/mp4');
+  headers.set('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+  headers.set('Accept-Ranges', 'bytes');
+  
+  return new Response(object.body, { headers });
+});
+
 export { publicRoutes };

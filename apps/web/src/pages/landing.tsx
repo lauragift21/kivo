@@ -63,6 +63,8 @@ function useScrollAnimation() {
 
 // Video Modal Component
 function VideoModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -71,6 +73,14 @@ function VideoModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
     if (isOpen) {
       document.addEventListener('keydown', handleEscape);
       document.body.style.overflow = 'hidden';
+      // Auto-play when modal opens
+      videoRef.current?.play();
+    } else {
+      // Pause and reset when modal closes
+      if (videoRef.current) {
+        videoRef.current.pause();
+        videoRef.current.currentTime = 0;
+      }
     }
     
     return () => {
@@ -98,11 +108,16 @@ function VideoModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
         </button>
         
         <div className="relative bg-foreground rounded-2xl overflow-hidden shadow-2xl aspect-video">
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
-            <Play className="h-16 w-16 mb-4 opacity-50" />
-            <p className="text-lg font-medium">Demo video coming soon</p>
-            <p className="text-sm text-white/60 mt-2">Check back later for a full walkthrough</p>
-          </div>
+          <video
+            ref={videoRef}
+            className="w-full h-full object-cover"
+            controls
+            playsInline
+            preload="metadata"
+          >
+            <source src="/api/public/demo-video" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
         </div>
       </div>
     </div>
