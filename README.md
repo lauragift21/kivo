@@ -2,7 +2,7 @@
 
 Modern invoicing for freelancers and independent creators. Built on the Cloudflare developer platform.
 
-![Kivo Demo](docs/screenshots/kivo.gif)
+![Kivo Demo](screenshots/kivo.gif)
 
 ## Features
 
