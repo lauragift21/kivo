@@ -1,31 +1,79 @@
 import type { InvoiceWithClient, Settings } from '@kivo/shared';
 import { formatCurrency, formatDateForTimezone } from '@kivo/shared';
 
-// Simple PDF generation for Workers environment
-// Using a basic approach that works without native dependencies
+// PDF generation using Cloudflare Browser Rendering API
+// Falls back to HTML if the API is unavailable
+
+export interface PDFResult {
+  body: ReadableStream | ArrayBuffer;
+  contentType: string;
+  filename: string;
+}
 
 export class PDFService {
   private storage: R2Bucket;
+  private accountId: string;
+  private apiToken: string;
 
-  constructor(storage: R2Bucket) {
+  constructor(storage: R2Bucket, accountId: string, apiToken: string) {
     this.storage = storage;
+    this.accountId = accountId;
+    this.apiToken = apiToken;
   }
 
   /**
-   * Generate a PDF for an invoice
-   * This creates a simple HTML-based PDF that can be rendered by browsers
+   * Generate a PDF for an invoice using Cloudflare Browser Rendering API
+   * Falls back to HTML if the API call fails
    */
   async generateInvoicePDF(
     invoice: InvoiceWithClient,
     settings: Settings
-  ): Promise<ArrayBuffer> {
+  ): Promise<{ data: ArrayBuffer; isPdf: boolean }> {
     const html = this.generateInvoiceHTML(invoice, settings);
-    
-    // Convert HTML to a simple PDF-like format
-    // In production, you might want to use a headless browser API or a PDF service
-    // For now, we'll store HTML that can be converted/printed to PDF
+
+    // Try Browser Rendering API first
+    if (this.accountId && this.apiToken) {
+      try {
+        const response = await fetch(
+          `https://api.cloudflare.com/client/v4/accounts/${this.accountId}/browser-rendering/pdf`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${this.apiToken}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              html,
+              pdfOptions: {
+                format: 'a4',
+                printBackground: true,
+                margin: {
+                  top: '20px',
+                  bottom: '20px',
+                  left: '20px',
+                  right: '20px',
+                },
+              },
+            }),
+          }
+        );
+
+        if (response.ok) {
+          const pdfBuffer = await response.arrayBuffer();
+          return { data: pdfBuffer, isPdf: true };
+        }
+
+        // Log error but continue to fallback
+        console.error('Browser Rendering API error:', response.status, await response.text());
+      } catch (error) {
+        console.error('Browser Rendering API failed:', error);
+      }
+    }
+
+    // Fallback to HTML
+    console.warn('Falling back to HTML generation');
     const encoder = new TextEncoder();
-    return encoder.encode(html).buffer as ArrayBuffer;
+    return { data: encoder.encode(html).buffer as ArrayBuffer, isPdf: false };
   }
 
   /**
@@ -90,7 +138,7 @@ export class PDFService {
     .invoice-number {
       font-size: 28px;
       font-weight: 700;
-      color: #6366F1;
+      color: #10B981;
       margin-bottom: 8px;
     }
     
@@ -202,9 +250,9 @@ export class PDFService {
     
     .status-draft { background: #f3f4f6; color: #6b7280; }
     .status-sent { background: #dbeafe; color: #2563eb; }
-    .status-viewed { background: #f3e8ff; color: #9333ea; }
+    .status-viewed { background: #ede9fe; color: #8B5CF6; }
     .status-paid { background: #dcfce7; color: #16a34a; }
-    .status-overdue { background: #fee2e2; color: #dc2626; }
+    .status-overdue { background: #fff7ed; color: #F97316; }
     .status-void { background: #f1f5f9; color: #64748b; }
     
     .notes {
@@ -362,14 +410,17 @@ export class PDFService {
     userId: string,
     invoiceId: string,
     invoiceNumber: string,
-    pdfData: ArrayBuffer
+    pdfData: ArrayBuffer,
+    isPdf: boolean
   ): Promise<string> {
-    const key = `${userId}/invoices/${invoiceId}/${invoiceNumber}.html`;
+    const extension = isPdf ? 'pdf' : 'html';
+    const contentType = isPdf ? 'application/pdf' : 'text/html';
+    const key = `${userId}/invoices/${invoiceId}/${invoiceNumber}.${extension}`;
     
     await this.storage.put(key, pdfData, {
       httpMetadata: {
-        contentType: 'text/html',
-        contentDisposition: `inline; filename="${invoiceNumber}.html"`,
+        contentType,
+        contentDisposition: `inline; filename="${invoiceNumber}.${extension}"`,
       },
     });
 
@@ -378,16 +429,47 @@ export class PDFService {
 
   /**
    * Get PDF from R2
+   * Tries PDF first, then falls back to HTML for legacy files
    */
-  async getPDF(key: string): Promise<R2ObjectBody | null> {
-    return this.storage.get(key);
+  async getPDF(userId: string, invoiceId: string, invoiceNumber: string): Promise<PDFResult | null> {
+    // Try PDF first
+    const pdfKey = `${userId}/invoices/${invoiceId}/${invoiceNumber}.pdf`;
+    let file = await this.storage.get(pdfKey);
+    
+    if (file) {
+      return {
+        body: file.body,
+        contentType: 'application/pdf',
+        filename: `${invoiceNumber}.pdf`,
+      };
+    }
+
+    // Fall back to HTML for legacy files
+    const htmlKey = `${userId}/invoices/${invoiceId}/${invoiceNumber}.html`;
+    file = await this.storage.get(htmlKey);
+    
+    if (file) {
+      return {
+        body: file.body,
+        contentType: 'text/html',
+        filename: `${invoiceNumber}.html`,
+      };
+    }
+
+    return null;
   }
 
   /**
-   * Delete PDF from R2
+   * Delete PDF from R2 (both PDF and HTML versions)
    */
-  async deletePDF(key: string): Promise<void> {
-    await this.storage.delete(key);
+  async deletePDF(userId: string, invoiceId: string, invoiceNumber: string): Promise<void> {
+    const pdfKey = `${userId}/invoices/${invoiceId}/${invoiceNumber}.pdf`;
+    const htmlKey = `${userId}/invoices/${invoiceId}/${invoiceNumber}.html`;
+    
+    await Promise.all([
+      this.storage.delete(pdfKey),
+      this.storage.delete(htmlKey),
+    ]);
   }
 
   /**

@@ -3,16 +3,16 @@
 @tailwind utilities;
 
 /*
- * Kivo Design System - Editorial Black & White + Indigo
+ * Kivo Design System - Editorial Black & White + Rose
  * 
  * Aesthetic: Magazine-quality, sophisticated, premium
  * Typography: Instrument Serif (display) + Geist (body)
- * Colors: Black & white base with indigo accent #6366F1
+ * Colors: Black & white base with rose accent #E11D48
  */
 
 @layer base {
   :root {
-    /* Kivo Light Theme - Black & White + Indigo Accent */
+    /* Kivo Light Theme - Black & White + Rose Accent */
     --background: 0 0% 100%;              /* Pure white */
     --foreground: 0 0% 9%;                /* Near black for text */
     
@@ -22,7 +22,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 9%;
     
-    --primary: 239 84% 67%;               /* Indigo #6366F1 */
+    --primary:  160 84% 39%;               /* Rose #E11D48 */
     --primary-foreground: 0 0% 100%;
     
     --secondary: 0 0% 96%;                /* Light gray */
@@ -31,7 +31,7 @@
     --muted: 0 0% 96%;
     --muted-foreground: 0 0% 45%;         /* Medium gray */
     
-    --accent: 239 84% 67%;                /* Indigo #6366F1 */
+    --accent:  160 84% 39%;                /* Rose #E11D48 */
     --accent-foreground: 0 0% 100%;
     
     --destructive: 0 84% 60%;             /* Red */
@@ -39,7 +39,7 @@
     
     --border: 0 0% 90%;                   /* Light border */
     --input: 0 0% 90%;
-    --ring: 239 84% 67%;                  /* Indigo ring for focus */
+    --ring:  160 84% 39%;                  /* Rose ring for focus */
     
     --radius: 0.75rem;
 
@@ -47,14 +47,14 @@
     --status-draft: 0 0% 45%;
     --status-draft-bg: 0 0% 96%;
     
-    --status-sent: 239 84% 67%;
-    --status-sent-bg: 239 84% 97%;
+    --status-sent: 217 91% 60%;
+    --status-sent-bg: 217 91% 97%;
     
-    --status-viewed: 220 13% 46%;
-    --status-viewed-bg: 220 14% 96%;
+    --status-viewed: 263 70% 50%;
+    --status-viewed-bg: 263 70% 97%;
     
-    --status-overdue: 0 84% 60%;
-    --status-overdue-bg: 0 100% 96%;
+    --status-overdue: 25 95% 53%;
+    --status-overdue-bg: 25 95% 97%;
     
     --status-settled: 142 71% 45%;
     --status-settled-bg: 142 76% 95%;

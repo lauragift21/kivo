@@ -115,7 +115,7 @@ function VideoModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
             playsInline
             preload="metadata"
           >
-            <source src="/api/public/demo-video" type="video/mp4" />
+            <source src="/api/public/demo-video?v=2" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         </div>

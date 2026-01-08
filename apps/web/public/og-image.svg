@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <!-- Subtle grid pattern -->
+    <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+      <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#f0f0f0" stroke-width="1"/>
+    </pattern>
+    <!-- Rose gradient -->
+    <linearGradient id="roseGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#E11D48"/>
+      <stop offset="100%" style="stop-color:#BE123C"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#ffffff"/>
+  <rect width="1200" height="630" fill="url(#grid)" opacity="0.5"/>
+  
+  <!-- Rose accent bar at top -->
+  <rect x="0" y="0" width="1200" height="6" fill="url(#roseGradient)"/>
+  
+  <!-- Left content section -->
+  <g transform="translate(80, 180)">
+    <!-- Logo mark -->
+    <rect width="56" height="56" rx="12" fill="#000000"/>
+    <path d="M16 18h24M16 28h18M16 38h14" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
+    
+    <!-- Brand name -->
+    <text x="76" y="42" font-family="Georgia, 'Times New Roman', serif" font-size="52" font-weight="400" fill="#0a0a0a">Kivo</text>
+  </g>
+  
+  <!-- Headline -->
+  <text x="80" y="320" font-family="Georgia, 'Times New Roman', serif" font-size="64" font-weight="400" fill="#0a0a0a">Beautiful invoices.</text>
+  <text x="80" y="395" font-family="Georgia, 'Times New Roman', serif" font-size="64" font-weight="400" fill="#0a0a0a">Effortless payments.</text>
+  
+  <!-- Subheadline -->
+  <text x="80" y="470" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="24" fill="#6b7280">The modern invoicing platform for freelancers and creators.</text>
+  
+  <!-- CTA pill -->
+  <g transform="translate(80, 510)">
+    <rect width="160" height="48" rx="24" fill="#0a0a0a"/>
+    <text x="80" y="31" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="500" fill="white" text-anchor="middle">Try free</text>
+  </g>
+  
+  <!-- Right side: Invoice mockup -->
+  <g transform="translate(700, 100)">
+    <!-- Invoice card shadow -->
+    <rect x="8" y="8" width="400" height="450" rx="16" fill="#0a0a0a" opacity="0.08"/>
+    <!-- Invoice card -->
+    <rect x="0" y="0" width="400" height="450" rx="16" fill="white" stroke="#e5e5e5" stroke-width="1"/>
+    
+    <!-- Invoice header -->
+    <rect x="0" y="0" width="400" height="80" rx="16" fill="#fafafa"/>
+    <rect x="0" y="60" width="400" height="20" fill="#fafafa"/>
+    
+    <!-- Invoice number badge -->
+    <text x="30" y="50" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="14" font-weight="600" fill="#E11D48">INV-0042</text>
+    
+    <!-- Status badge -->
+    <rect x="300" y="30" width="70" height="26" rx="13" fill="#dcfce7"/>
+    <text x="335" y="48" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" font-weight="500" fill="#16a34a" text-anchor="middle">PAID</text>
+    
+    <!-- From section -->
+    <text x="30" y="115" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" font-weight="500" fill="#9ca3af" letter-spacing="0.5">FROM</text>
+    <text x="30" y="135" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="14" font-weight="600" fill="#0a0a0a">Studio Creative Co.</text>
+    <text x="30" y="155" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#6b7280">hello@studio.co</text>
+    
+    <!-- To section -->
+    <text x="220" y="115" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" font-weight="500" fill="#9ca3af" letter-spacing="0.5">BILL TO</text>
+    <text x="220" y="135" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="14" font-weight="600" fill="#0a0a0a">Acme Inc.</text>
+    <text x="220" y="155" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#6b7280">billing@acme.com</text>
+    
+    <!-- Divider -->
+    <line x1="30" y1="180" x2="370" y2="180" stroke="#e5e5e5" stroke-width="1"/>
+    
+    <!-- Line items header -->
+    <text x="30" y="210" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" font-weight="500" fill="#9ca3af" letter-spacing="0.5">DESCRIPTION</text>
+    <text x="340" y="210" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" font-weight="500" fill="#9ca3af" letter-spacing="0.5">AMOUNT</text>
+    
+    <!-- Line items -->
+    <text x="30" y="245" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" fill="#0a0a0a">Brand Identity Design</text>
+    <text x="340" y="245" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" fill="#0a0a0a">$2,500</text>
+    
+    <text x="30" y="280" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" fill="#0a0a0a">Website Development</text>
+    <text x="340" y="280" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" fill="#0a0a0a">$4,800</text>
+    
+    <text x="30" y="315" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" fill="#0a0a0a">Social Media Assets</text>
+    <text x="340" y="315" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" fill="#0a0a0a">$1,200</text>
+    
+    <!-- Divider -->
+    <line x1="30" y1="345" x2="370" y2="345" stroke="#e5e5e5" stroke-width="1"/>
+    
+    <!-- Subtotal -->
+    <text x="250" y="375" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#6b7280">Subtotal</text>
+    <text x="340" y="375" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#0a0a0a">$8,500</text>
+    
+    <!-- Total -->
+    <rect x="220" y="395" width="160" height="40" rx="8" fill="#fafafa"/>
+    <text x="250" y="421" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" font-weight="600" fill="#0a0a0a">Total</text>
+    <text x="340" y="421" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="16" font-weight="700" fill="#0a0a0a">$8,500</text>
+  </g>
+  
+  <!-- URL at bottom -->
+  <text x="1120" y="590" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="16" fill="#9ca3af" text-anchor="end">kivo.lauragift.workers.dev</text>
+</svg>

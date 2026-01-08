@@ -7,7 +7,9 @@
   // Static assets (web frontend)
   "assets": {
     "directory": "../web/dist",
-    "binding": "ASSETS"
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/health"]
   },
   
   // D1 Database
@@ -47,7 +49,8 @@
     "ENVIRONMENT": "production",
     "FRONTEND_URL": "https://kivo.lauragift.workers.dev",
     "API_URL": "https://kivo.lauragift.workers.dev",
-    "FROM_EMAIL": "noreply@thegiftcode.dev"
+    "FROM_EMAIL": "noreply@thegiftcode.dev",
+    "CF_ACCOUNT_ID": "20d70bbc30c928fa3f30d3669ff13331"
   },
   
   // Migrations for Durable Objects

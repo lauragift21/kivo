@@ -29,11 +29,11 @@ const badgeVariants = cva(
         /* Draft: Neutral gray - invoice not yet sent */
         draft: 'bg-muted text-muted-foreground',
 
-        /* Sent: Primary color - invoice delivered to client */
-        sent: 'bg-primary/10 text-primary',
+        /* Sent: Rose - invoice delivered to client */
+        sent: 'bg-status-sent-bg text-status-sent',
 
-        /* Viewed: Primary color with different shade - client has opened the invoice */
-        viewed: 'bg-primary/10 text-primary',
+        /* Viewed: Violet - client has opened the invoice */
+        viewed: 'bg-status-viewed-bg text-status-viewed',
 
         /* Outstanding: Soft amber - payment is due (replaces generic "unpaid") */
         outstanding: 'bg-status-overdue/10 text-status-overdue',

@@ -134,9 +134,8 @@ publicRoutes.get('/invoice/:token/pdf', async (c) => {
     throw new NotFoundError('PDF');
   }
 
-  const pdfKey = `${invoice.user_id}/invoices/${tokenRecord.invoice_id}/${invoice.invoice_number}.html`;
-  const pdfService = new PDFService(c.env.STORAGE);
-  const pdf = await pdfService.getPDF(pdfKey);
+  const pdfService = new PDFService(c.env.STORAGE, c.env.CF_ACCOUNT_ID, c.env.CF_API_TOKEN);
+  const pdf = await pdfService.getPDF(invoice.user_id, tokenRecord.invoice_id, invoice.invoice_number);
 
   if (!pdf) {
     throw new NotFoundError('PDF');
@@ -144,8 +143,8 @@ publicRoutes.get('/invoice/:token/pdf', async (c) => {
 
   return new Response(pdf.body, {
     headers: {
-      'Content-Type': 'text/html',
-      'Content-Disposition': `inline; filename="${invoice.invoice_number}.html"`,
+      'Content-Type': pdf.contentType,
+      'Content-Disposition': `inline; filename="${pdf.filename}"`,
     },
   });
 });
@@ -229,7 +228,7 @@ publicRoutes.post('/invoice/:token/pay', async (c) => {
  * Get demo video
  */
 publicRoutes.get('/demo-video', async (c) => {
-  const videoKey = 'demo/kivo-demo.mp4';
+  const videoKey = 'demo/kivo.mp4';
   
   const object = await c.env.STORAGE.get(videoKey);
   

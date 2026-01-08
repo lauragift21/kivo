@@ -18,6 +18,10 @@ export interface Env {
   RESEND_API_KEY: string;
   STRIPE_SECRET_KEY: string;
   STRIPE_WEBHOOK_SECRET: string;
+  
+  // Cloudflare Browser Rendering
+  CF_ACCOUNT_ID: string;
+  CF_API_TOKEN: string;
 }
 
 export interface Variables {

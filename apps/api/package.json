@@ -17,7 +17,6 @@
   "dependencies": {
     "@kivo/shared": "*",
     "hono": "^4.0.0",
-    "pdfkit": "^0.14.0",
     "stripe": "^14.10.0"
   },
   "devDependencies": {

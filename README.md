@@ -2,24 +2,13 @@
 
 Modern invoicing for freelancers and independent creators. Built on the Cloudflare developer platform.
 
-## Screenshots
-
-![Dashboard](docs/screenshots/dashboard.png)
-*Dashboard with KPIs and recent invoices*
-
-![Invoice Detail](docs/screenshots/invoice-detail.png)
-*Invoice detail view with line items and activity*
-
-![Public Invoice](docs/screenshots/public-invoice.png)
-*Public invoice view with payment option*
-
 ## Features
 
 - **Authentication**: Email magic link authentication (passwordless)
 - **Multi-tenant**: Each user only sees their own data
 - **Clients**: Create, edit, archive clients with full contact details
 - **Invoices**: Full invoice lifecycle - draft, send, track, and get paid
-- **PDF Generation**: Branded PDF invoices stored in R2
+- **PDF Generation**: Real PDF invoices via Cloudflare Browser Rendering API, stored in R2
 - **Email Notifications**: Invoice delivery, reminders, payment receipts via Resend
 - **Payments**: Stripe Checkout integration with webhook handling
 - **Reminders**: Automatic payment reminders using Durable Objects
@@ -57,6 +46,7 @@ This unified deployment provides:
 - Hono for routing
 - D1 for relational data
 - R2 for PDF/asset storage
+- Browser Rendering API for PDF generation
 - Durable Objects for reminder scheduling
 - Cron Triggers for periodic reconciliation
 - Static Assets for serving the frontend
@@ -128,6 +118,10 @@ wrangler secret put STRIPE_SECRET_KEY
 # Stripe webhook secret
 wrangler secret put STRIPE_WEBHOOK_SECRET
 # (Get after creating webhook endpoint)
+
+# Cloudflare Browser Rendering API token (for PDF generation)
+wrangler secret put CF_API_TOKEN
+# (Create at https://dash.cloudflare.com/profile/api-tokens with Browser Rendering permissions)
 ```
 
 ### 4. Run Database Migrations
@@ -215,6 +209,8 @@ Your app will be available at: `https://kivo.<your-subdomain>.workers.dev`
 | `RESEND_API_KEY` | Resend API key for sending emails |
 | `STRIPE_SECRET_KEY` | Stripe secret key |
 | `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret |
+| `CF_ACCOUNT_ID` | Cloudflare account ID (for Browser Rendering API) |
+| `CF_API_TOKEN` | Cloudflare API token with Browser Rendering permissions |
 | `FRONTEND_URL` | Frontend URL (for CORS and email links) |
 | `API_URL` | API URL (for generating links) |
 

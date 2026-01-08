@@ -572,12 +572,16 @@ invoices.post('/:id/pdf', async (c) => {
     'SELECT * FROM settings WHERE user_id = ?'
   ).bind(userId).first<Settings>();
 
-  // Generate PDF
-  const pdfService = new PDFService(c.env.STORAGE);
-  const pdfData = await pdfService.generateInvoicePDF(invoice as InvoiceWithClient, settings!);
+  if (!settings) {
+    throw new ValidationError('User settings not found. Please configure your business settings first.');
+  }
+
+  // Generate PDF using Browser Rendering API (falls back to HTML)
+  const pdfService = new PDFService(c.env.STORAGE, c.env.CF_ACCOUNT_ID, c.env.CF_API_TOKEN);
+  const { data: pdfData, isPdf } = await pdfService.generateInvoicePDF(invoice as InvoiceWithClient, settings);
   
-  // Store PDF
-  const pdfKey = await pdfService.storePDF(userId, invoiceId, invoice.invoice_number, pdfData);
+  // Store PDF (or HTML fallback)
+  const pdfKey = await pdfService.storePDF(userId, invoiceId, invoice.invoice_number, pdfData, isPdf);
 
   // Update invoice
   const now = new Date().toISOString();
@@ -589,6 +593,7 @@ invoices.post('/:id/pdf', async (c) => {
     data: {
       message: 'PDF generated successfully',
       pdf_key: pdfKey,
+      format: isPdf ? 'pdf' : 'html',
     },
     requestId,
   });
@@ -610,9 +615,8 @@ invoices.get('/:id/pdf', async (c) => {
     throw new NotFoundError('Invoice');
   }
 
-  const pdfKey = `${userId}/invoices/${invoiceId}/${invoice.invoice_number}.html`;
-  const pdfService = new PDFService(c.env.STORAGE);
-  const pdf = await pdfService.getPDF(pdfKey);
+  const pdfService = new PDFService(c.env.STORAGE, c.env.CF_ACCOUNT_ID, c.env.CF_API_TOKEN);
+  const pdf = await pdfService.getPDF(userId, invoiceId, invoice.invoice_number);
 
   if (!pdf) {
     throw new NotFoundError('PDF');
@@ -620,8 +624,8 @@ invoices.get('/:id/pdf', async (c) => {
 
   return new Response(pdf.body, {
     headers: {
-      'Content-Type': 'text/html',
-      'Content-Disposition': `inline; filename="${invoice.invoice_number}.html"`,
+      'Content-Type': pdf.contentType,
+      'Content-Disposition': `inline; filename="${pdf.filename}"`,
     },
   });
 });

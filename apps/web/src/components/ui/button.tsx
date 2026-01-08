@@ -7,8 +7,8 @@ import { cn } from '@/lib/utils';
  * Kivo Button Component
  * 
  * Design principles:
- * - Black and white base with indigo accent
- * - Primary buttons use indigo
+ * - Black and white base with rose accent
+ * - Primary buttons use rose
  * - Simple and clear
  * - Medium font weight, not bold
  */
@@ -17,7 +17,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        /* Primary: Indigo button - main CTA */
+        /* Primary: Rose button - main CTA */
         default: 'bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98] shadow-sm hover:shadow-md',
         
         /* Destructive: Red - for delete actions */
