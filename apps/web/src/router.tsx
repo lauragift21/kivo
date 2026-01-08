@@ -13,6 +13,8 @@ import { InvoiceDetailPage } from '@/pages/invoices/detail';
 import { InvoiceFormPage } from '@/pages/invoices/form';
 import { SettingsPage } from '@/pages/settings';
 import { PublicInvoicePage } from '@/pages/public-invoice';
+import { PrivacyPage } from '@/pages/privacy';
+import { TermsPage } from '@/pages/terms';
 
 // Root route
 const rootRoute = createRootRoute({
@@ -52,6 +54,20 @@ const landingRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   component: LandingPage,
+});
+
+// Privacy page (public)
+const privacyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'privacy',
+  component: PrivacyPage,
+});
+
+// Terms page (public)
+const termsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'terms',
+  component: TermsPage,
 });
 
 // Public invoice route (no auth required)
@@ -144,6 +160,8 @@ const settingsRoute = createRoute({
 // Build route tree
 const routeTree = rootRoute.addChildren([
   landingRoute,
+  privacyRoute,
+  termsRoute,
   authRoute.addChildren([signInRoute, signUpRoute, verifyRoute]),
   publicInvoiceRoute,
   protectedRoute.addChildren([

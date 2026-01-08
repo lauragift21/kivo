@@ -67,7 +67,7 @@ export class EmailService {
             <h2 style="color: #1a1a1a; font-size: 20px; font-weight: 600; margin: 0 0 15px 0;">Sign in to your account</h2>
             <p style="color: #6b7280; margin: 0 0 20px 0;">Click the button below to sign in to Kivo. This link will expire in 15 minutes.</p>
             
-            <a href="${magicLink}" style="display: inline-block; background: #2563eb; color: white; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 500;">Sign in</a>
+            <a href="${magicLink}" style="display: inline-block; background: #6366F1; color: white; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 500;">Sign in</a>
           </div>
           
           <p style="color: #9ca3af; font-size: 14px; margin: 0;">If you did not request this email, you can safely ignore it.</p>
@@ -117,7 +117,7 @@ export class EmailService {
               </div>
             </div>
             
-            <a href="${publicUrl}" style="display: inline-block; background: #2563eb; color: white; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 500;">View Invoice</a>
+            <a href="${publicUrl}" style="display: inline-block; background: #6366F1; color: white; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 500;">View Invoice</a>
           </div>
           
           <p style="color: #9ca3af; font-size: 14px; margin: 0;">This invoice was sent via Kivo.</p>
@@ -181,7 +181,7 @@ export class EmailService {
               </div>
             </div>
             
-            <a href="${publicUrl}" style="display: inline-block; background: #2563eb; color: white; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 500;">View and Pay Invoice</a>
+            <a href="${publicUrl}" style="display: inline-block; background: #6366F1; color: white; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 500;">View and Pay Invoice</a>
           </div>
           
           <p style="color: #9ca3af; font-size: 14px; margin: 0;">This reminder was sent via Kivo.</p>

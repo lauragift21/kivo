@@ -7,8 +7,8 @@ import { cn } from '@/lib/utils';
  * Kivo Button Component
  * 
  * Design principles:
- * - Black and white theme
- * - Subtle orange on hover (not overwhelming)
+ * - Black and white base with indigo accent
+ * - Primary buttons use indigo
  * - Simple and clear
  * - Medium font weight, not bold
  */
@@ -17,8 +17,8 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        /* Primary: Black button - stays black, subtle lift on hover */
-        default: 'bg-foreground text-background hover:bg-foreground/90 active:scale-[0.98] shadow-sm hover:shadow-md',
+        /* Primary: Indigo button - main CTA */
+        default: 'bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98] shadow-sm hover:shadow-md',
         
         /* Destructive: Red - for delete actions */
         destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90 active:scale-[0.98]',
@@ -35,8 +35,8 @@ const buttonVariants = cva(
         /* Link: Text only - for inline actions */
         link: 'text-foreground underline-offset-4 hover:underline',
 
-        /* Accent: Subtle orange - use sparingly */
-        accent: 'bg-accent/90 text-white hover:bg-accent active:scale-[0.98]',
+        /* Dark: Black button - for emphasis */
+        dark: 'bg-foreground text-background hover:bg-foreground/90 active:scale-[0.98] shadow-sm hover:shadow-md',
       },
       size: {
         default: 'h-10 px-4 py-2',

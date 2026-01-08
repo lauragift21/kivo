@@ -10,19 +10,21 @@ import {
   ArrowRight,
   Check,
   CheckCircle,
-  Sparkles,
   X,
   Play,
+  Target,
+  User,
+  Zap,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/ui/logo';
 
 /**
- * Kivo Landing Page - Editorial Black & White Design
+ * Kivo Landing Page - Editorial Black & White + Indigo
  * 
  * Aesthetic: Magazine-quality, sophisticated, premium
  * Typography: Instrument Serif (headlines) + Geist (body)
- * Colors: Pure black & white with subtle orange accent
+ * Colors: Black & white base with indigo accent #6366F1
  */
 
 // GitHub icon SVG component
@@ -150,13 +152,19 @@ function Header() {
             href="https://github.com/lauragift21/kivo" 
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="GitHub"
           >
             <GitHubIcon className="h-4 w-4" />
-            <span className="hidden lg:inline">Star</span>
           </a>
+          <Link 
+            to="/auth/signin"
+            className="hidden sm:inline-flex px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Sign in
+          </Link>
           <Button size="sm" className="rounded-full px-4" asChild>
-            <Link to="/auth/signin">Sign in</Link>
+            <Link to="/auth/signup">Try free</Link>
           </Button>
         </div>
       </div>
@@ -173,8 +181,8 @@ function InvoiceMockup() {
       
       {/* Main invoice card */}
       <div className="relative w-[320px] bg-card rounded-2xl shadow-card-hover border overflow-hidden animate-float">
-        {/* Black accent stripe */}
-        <div className="h-1 bg-foreground" />
+        {/* Indigo accent stripe */}
+        <div className="h-1 bg-primary" />
         
         {/* Header */}
         <div className="p-6 border-b border-border/50">
@@ -207,16 +215,16 @@ function InvoiceMockup() {
 
         {/* Status */}
         <div className="px-6 pb-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-secondary rounded-full">
-            <div className="w-2 h-2 rounded-full bg-foreground animate-pulse-subtle" />
-            <span className="text-xs font-semibold uppercase tracking-wide">Sent</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-full">
+            <div className="w-2 h-2 rounded-full bg-primary animate-pulse-subtle" />
+            <span className="text-xs font-semibold uppercase tracking-wide text-primary">Sent</span>
           </div>
         </div>
       </div>
 
-      {/* Notification toast */}
-      <div className="absolute -right-4 top-12 animate-notification">
-        <div className="flex items-center gap-2 px-4 py-3 bg-foreground text-white rounded-xl shadow-kivo-xl">
+      {/* Notification toast - hidden on mobile */}
+      <div className="absolute -right-4 top-12 animate-notification hidden sm:block">
+        <div className="flex items-center gap-2 px-4 py-3 bg-primary text-white rounded-xl shadow-kivo-xl">
           <CheckCircle className="h-4 w-4" />
           <span className="text-sm font-medium">Payment received!</span>
         </div>
@@ -229,7 +237,7 @@ function HeroSection({ onViewDemo }: { onViewDemo: () => void }) {
   return (
     <section className="relative min-h-screen flex items-center pt-24 pb-20 px-6 overflow-hidden">
       {/* Subtle background pattern */}
-      <div className="absolute inset-0 grid-pattern opacity-50" />
+      <div className="absolute inset-0 grid-pattern opacity-30" />
       
       <div className="relative z-10 max-w-6xl mx-auto w-full">
         <div className="grid lg:grid-cols-2 gap-16 lg:gap-12 items-center">
@@ -237,7 +245,7 @@ function HeroSection({ onViewDemo }: { onViewDemo: () => void }) {
           <div className="text-center lg:text-left">
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border bg-secondary/50 text-sm mb-8">
-              <span className="w-2 h-2 rounded-full bg-foreground animate-pulse-subtle" />
+              <span className="w-2 h-2 rounded-full bg-primary animate-pulse-subtle" />
               <span className="text-muted-foreground">Free to start</span>
               <span className="text-muted-foreground/50">·</span>
               <span className="text-muted-foreground">No credit card</span>
@@ -248,16 +256,12 @@ function HeroSection({ onViewDemo }: { onViewDemo: () => void }) {
               Invoicing that fits{' '}
               <span className="relative inline-block">
                 <span className="relative z-10">how you work.</span>
-                <span className="absolute bottom-2 left-0 right-0 h-3 bg-foreground/10 -z-0" />
+                <span className="absolute bottom-2 left-0 right-0 h-3 bg-primary/15 -z-0" />
               </span>
             </h1>
             
-            <p className="text-xl md:text-2xl text-muted-foreground mb-4 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-              Modern invoicing for freelancers and independent creators.
-            </p>
-            
-            <p className="text-base text-muted-foreground/80 mb-10 max-w-lg mx-auto lg:mx-0">
-              Create invoices, send them, track what is outstanding, and know when work is settled.
+            <p className="text-xl md:text-2xl text-muted-foreground mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+              Modern invoicing for freelancers and independent creators. Create, send, and track invoices—know exactly when work is settled.
             </p>
             
             {/* CTA buttons */}
@@ -282,11 +286,6 @@ function HeroSection({ onViewDemo }: { onViewDemo: () => void }) {
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-muted-foreground/50">
-        <span className="text-xs uppercase tracking-widest">Scroll</span>
-        <div className="w-px h-8 bg-gradient-to-b from-muted-foreground/30 to-transparent" />
-      </div>
     </section>
   );
 }
@@ -295,7 +294,7 @@ function ProblemSection() {
   const ref = useScrollAnimation();
 
   return (
-    <section ref={ref} className="py-32 px-6 relative">
+    <section ref={ref} className="py-20 px-6 relative">
       <div className="max-w-4xl mx-auto text-center">
         <div className="animate-on-scroll">
           <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl tracking-tight mb-8 leading-tight">
@@ -303,7 +302,7 @@ function ProblemSection() {
             <span className="italic text-muted-foreground">stressful.</span>
           </h2>
           
-          <p className="text-xl text-muted-foreground mb-6 leading-relaxed">
+          <p className="text-xl text-muted-foreground mb-10 leading-relaxed">
             Most tools are{' '}
             <span className="relative inline-block px-1">
               <span className="relative z-10">bloated</span>
@@ -313,15 +312,10 @@ function ProblemSection() {
               <span className="relative z-10">loud</span>
               <span className="absolute top-1/2 left-0 right-0 h-0.5 bg-muted-foreground/40" />
             </span>,{' '}
-            or built for accounting teams.
-          </p>
-          
-          <p className="text-xl text-muted-foreground mb-10">
-            You just want to send a clear invoice, follow up automatically, and move on with your work.
+            or built for accounting teams. You just want to send a clear invoice and move on.
           </p>
 
-          <div className="inline-flex items-center gap-3 px-6 py-3 bg-secondary rounded-full">
-            <Sparkles className="h-5 w-5 text-accent" />
+          <div className="inline-flex items-center px-6 py-3 bg-secondary rounded-full">
             <span className="text-lg font-medium">Kivo is built for that.</span>
           </div>
         </div>
@@ -331,27 +325,23 @@ function ProblemSection() {
 }
 
 function DifferentiatorCard({ 
-  number,
+  icon: Icon,
   title, 
   description,
   delay 
 }: { 
-  number: string;
+  icon: React.ComponentType<{ className?: string }>;
   title: string; 
   description: string;
   delay: string;
 }) {
   return (
     <div className={`animate-on-scroll ${delay} group relative p-8 rounded-2xl border bg-card card-hover-border transition-all duration-300 hover:shadow-card-hover hover:-translate-y-1`}>
-      {/* Large number */}
-      <span className="absolute -top-6 -left-2 text-7xl font-serif text-foreground/5 group-hover:text-foreground/10 transition-colors">
-        {number}
-      </span>
-      
-      <div className="relative">
-        <h3 className="text-lg font-semibold mb-3">{title}</h3>
-        <p className="text-muted-foreground leading-relaxed">{description}</p>
+      <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center mb-4">
+        <Icon className="h-5 w-5 text-foreground" />
       </div>
+      <h3 className="text-lg font-semibold mb-3">{title}</h3>
+      <p className="text-muted-foreground leading-relaxed">{description}</p>
     </div>
   );
 }
@@ -361,36 +351,35 @@ function DifferentiatorsSection() {
   
   const differentiators = [
     {
-      number: '01',
+      icon: Target,
       title: 'Clear by default',
       description: 'Every invoice has one job. To move from sent to settled. No clutter.',
     },
     {
-      number: '02',
+      icon: User,
       title: 'Built for independent work',
       description: 'Freelancers, consultants, and creators do not need enterprise software. Kivo stays focused.',
     },
     {
-      number: '03',
+      icon: Bell,
       title: 'Automatic reminders',
       description: 'Reminders go out when needed. You do not have to chase clients.',
     },
     {
-      number: '04',
+      icon: Zap,
       title: 'Modern and reliable',
       description: 'Fast, secure, and built on a global network you can trust.',
     },
   ];
 
   return (
-    <section ref={ref} className="py-24 px-6 bg-secondary/30 relative overflow-hidden">
-      <div className="absolute inset-0 dot-pattern opacity-30" />
+    <section ref={ref} className="py-16 px-6 bg-secondary/30 relative overflow-hidden">
+      <div className="absolute inset-0 dot-pattern opacity-20" />
       
       <div className="relative max-w-5xl mx-auto">
-        <div className="animate-on-scroll text-center mb-16">
-          <span className="text-sm font-medium text-muted-foreground uppercase tracking-widest mb-4 block">Why Kivo</span>
+        <div className="animate-on-scroll text-center mb-12">
           <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl tracking-tight">
-            What makes it different
+            Why Kivo
           </h2>
         </div>
         
@@ -422,7 +411,7 @@ function FeatureCard({
   return (
     <div className={`animate-on-scroll ${delay} group relative p-6 rounded-2xl border bg-card overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover`}>
       {/* Hover accent line */}
-      <div className="absolute top-0 left-0 w-full h-0.5 bg-foreground scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+      <div className="absolute top-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
       
       <div className="relative">
         <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center mb-5 transition-colors duration-300 group-hover:bg-foreground/5">
@@ -442,37 +431,37 @@ function FeaturesSection() {
     {
       icon: Users,
       title: 'Clients',
-      description: 'Keep client details in one place. Simple and organized.',
+      description: 'Keep client details organized in one place.',
     },
     {
       icon: FileText,
       title: 'Invoices',
-      description: 'Create clean invoices with line items, taxes, and discounts. Preview before sending.',
+      description: 'Create invoices with line items, taxes, and discounts.',
     },
     {
       icon: Globe,
       title: 'Public invoice links',
-      description: 'Clients can view and download invoices without logging in.',
+      description: 'Clients view and pay invoices without logging in.',
     },
     {
       icon: CreditCard,
       title: 'Payments',
-      description: 'Accept card payments with Stripe. Mark invoices as settled automatically.',
+      description: 'Accept card payments with Stripe. Auto-mark as settled.',
     },
     {
       icon: Bell,
       title: 'Reminders',
-      description: 'Kivo sends polite reminders before and after the due date.',
+      description: 'Automatic reminders before and after due dates.',
     },
     {
       icon: LayoutDashboard,
       title: 'Dashboard',
-      description: 'See what is outstanding, what is overdue, and what is settled. At a glance.',
+      description: 'See outstanding, overdue, and settled invoices at a glance.',
     },
   ];
 
   return (
-    <section id="features" ref={ref} className="py-24 px-6 scroll-mt-20">
+    <section id="features" ref={ref} className="py-16 px-6 scroll-mt-20">
       <div className="max-w-5xl mx-auto">
         <div className="animate-on-scroll text-center mb-4">
           <span className="text-sm font-medium text-muted-foreground uppercase tracking-widest mb-4 block">Features</span>
@@ -480,7 +469,7 @@ function FeaturesSection() {
             Core features
           </h2>
         </div>
-        <p className="animate-on-scroll animation-delay-100 text-muted-foreground text-center mb-16 max-w-xl mx-auto text-lg">
+        <p className="animate-on-scroll animation-delay-100 text-muted-foreground text-center mb-12 max-w-xl mx-auto text-lg">
           Everything you need to manage invoicing. Nothing you do not.
         </p>
         
@@ -530,102 +519,47 @@ function HowItWorksSection() {
   ];
 
   return (
-    <section id="how-it-works" ref={ref} className="py-24 px-6 bg-secondary/30 scroll-mt-20 relative overflow-hidden">
-      <div className="absolute inset-0 grid-pattern opacity-30" />
+    <section id="how-it-works" ref={ref} className="py-16 px-6 bg-secondary/30 scroll-mt-20 relative overflow-hidden">
+      <div className="absolute inset-0 grid-pattern opacity-50" />
       
       <div className="relative max-w-5xl mx-auto">
-        <div className="animate-on-scroll text-center mb-16">
+        <div className="animate-on-scroll text-center mb-12">
           <span className="text-sm font-medium text-muted-foreground uppercase tracking-widest mb-4 block">Process</span>
           <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl tracking-tight">
             How it works
           </h2>
         </div>
         
-        {/* Desktop: Horizontal cards */}
+        {/* Desktop & Mobile: Simple card grid */}
         <div className="animate-on-scroll animation-delay-200">
-          <div className="hidden md:block">
-            {/* Connecting line */}
-            <div className="relative mb-8">
-              <div className="absolute top-0 left-[12.5%] w-[75%] border-t-2 border-dashed border-border" />
-            </div>
-            
-            <div className="grid md:grid-cols-4 gap-6">
-              {steps.map((step) => {
-                const Icon = step.icon;
-                return (
-                  <div key={step.number} className="relative">
-                    {/* Step number */}
-                    <div className={`absolute -top-12 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold z-10 ${
-                      step.isLast
-                        ? 'bg-foreground text-background'
-                        : 'bg-foreground text-background'
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {steps.map((step) => {
+              const Icon = step.icon;
+              return (
+                <div key={step.number} className="relative">
+                  {/* Card */}
+                  <div className={`relative p-6 rounded-2xl border h-full transition-all duration-300 ${
+                    step.isLast 
+                      ? 'bg-foreground border-foreground text-white hover:shadow-kivo-xl' 
+                      : 'bg-card border-border hover:shadow-card-hover hover:-translate-y-1'
+                  }`}>
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${
+                      step.isLast ? 'bg-white/20' : 'bg-secondary'
                     }`}>
-                      {step.number}
+                      <Icon className={`h-6 w-6 ${step.isLast ? 'text-white' : 'text-foreground'}`} />
                     </div>
                     
-                    {/* Card */}
-                    <div className={`relative p-6 rounded-2xl border h-full transition-all duration-300 ${
-                      step.isLast 
-                        ? 'bg-foreground border-foreground text-white hover:shadow-kivo-xl' 
-                        : 'bg-card border-border hover:shadow-card-hover hover:-translate-y-1'
-                    }`}>
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${
-                        step.isLast ? 'bg-white/20' : 'bg-secondary'
-                      }`}>
-                        <Icon className={`h-6 w-6 ${step.isLast ? 'text-white' : 'text-foreground'}`} />
-                      </div>
-                      
-                      <h3 className={`font-semibold mb-2 ${step.isLast ? 'text-white' : 'text-foreground'}`}>
-                        {step.title}
-                      </h3>
-                      <p className={`text-sm leading-relaxed ${step.isLast ? 'text-white/80' : 'text-muted-foreground'}`}>
-                        {step.description}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile: Vertical timeline */}
-        <div className="md:hidden">
-          {steps.map((step, index) => {
-            const Icon = step.icon;
-            return (
-              <div key={step.number} className="relative pl-12 pb-10 last:pb-0">
-                {/* Vertical line */}
-                {index < steps.length - 1 && (
-                  <div className="absolute left-[15px] top-10 bottom-0 w-px border-l-2 border-dashed border-border" />
-                )}
-                
-                {/* Number */}
-                <div className={`absolute left-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                  step.isLast ? 'bg-foreground text-background' : 'bg-foreground text-background'
-                }`}>
-                  {step.number}
-                </div>
-                
-                {/* Card */}
-                <div className={`p-5 rounded-2xl border ${
-                  step.isLast 
-                    ? 'bg-foreground border-foreground text-white' 
-                    : 'bg-card border-border'
-                }`}>
-                  <div className="flex items-center gap-3 mb-2">
-                    <Icon className={`h-5 w-5 ${step.isLast ? 'text-white' : 'text-foreground'}`} />
-                    <h3 className={`font-semibold ${step.isLast ? 'text-white' : 'text-foreground'}`}>
+                    <h3 className={`font-semibold mb-2 ${step.isLast ? 'text-white' : 'text-foreground'}`}>
                       {step.title}
                     </h3>
+                    <p className={`text-sm leading-relaxed ${step.isLast ? 'text-white/80' : 'text-muted-foreground'}`}>
+                      {step.description}
+                    </p>
                   </div>
-                  <p className={`text-sm ${step.isLast ? 'text-white/80' : 'text-muted-foreground'}`}>
-                    {step.description}
-                  </p>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>
@@ -636,7 +570,7 @@ function CTASection({ onViewDemo }: { onViewDemo: () => void }) {
   const ref = useScrollAnimation();
 
   return (
-    <section ref={ref} className="py-24 px-6 relative overflow-hidden">
+    <section ref={ref} className="py-16 px-6 relative overflow-hidden">
       <div className="relative max-w-4xl mx-auto">
         <div className="animate-on-scroll">
           {/* Card-based CTA */}
@@ -661,7 +595,7 @@ function CTASection({ onViewDemo }: { onViewDemo: () => void }) {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
-              <Button variant="outline" size="lg" className="rounded-full px-6" onClick={onViewDemo}>
+              <Button variant="outline" size="lg" className="rounded-full px-6 border-foreground text-foreground hover:bg-foreground hover:text-background" onClick={onViewDemo}>
                 <Play className="mr-2 h-5 w-5" />
                 View demo
               </Button>
@@ -675,7 +609,7 @@ function CTASection({ onViewDemo }: { onViewDemo: () => void }) {
               </span>
               <span className="flex items-center gap-2">
                 <Check className="h-4 w-4" />
-                Free forever for basics
+                Free plan available
               </span>
               <span className="flex items-center gap-2">
                 <Check className="h-4 w-4" />
@@ -691,7 +625,7 @@ function CTASection({ onViewDemo }: { onViewDemo: () => void }) {
 
 function Footer() {
   return (
-    <footer className="py-16 px-6 border-t">
+    <footer className="py-12 px-6 border-t">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex flex-col md:flex-row items-center gap-6">
@@ -703,15 +637,12 @@ function Footer() {
           </div>
           
           <nav className="flex flex-wrap items-center justify-center gap-8">
-            <a href="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <Link to="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Privacy
-            </a>
-            <a href="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            </Link>
+            <Link to="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Terms
-            </a>
-            <a href="/docs" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Docs
-            </a>
+            </Link>
             <a 
               href="https://github.com/lauragift21/kivo" 
               target="_blank" 

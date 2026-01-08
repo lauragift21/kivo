@@ -3,18 +3,18 @@
 @tailwind utilities;
 
 /*
- * Kivo Design System - Editorial Black & White
+ * Kivo Design System - Editorial Black & White + Indigo
  * 
  * Aesthetic: Magazine-quality, sophisticated, premium
  * Typography: Instrument Serif (display) + Geist (body)
- * Colors: Pure black & white with subtle orange accent
+ * Colors: Black & white base with indigo accent #6366F1
  */
 
 @layer base {
   :root {
-    /* Kivo Light Theme - Black & White */
+    /* Kivo Light Theme - Black & White + Indigo Accent */
     --background: 0 0% 100%;              /* Pure white */
-    --foreground: 0 0% 9%;                /* Near black */
+    --foreground: 0 0% 9%;                /* Near black for text */
     
     --card: 0 0% 100%;                    /* White cards */
     --card-foreground: 0 0% 9%;
@@ -22,7 +22,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 9%;
     
-    --primary: 0 0% 9%;                   /* Black for primary */
+    --primary: 239 84% 67%;               /* Indigo #6366F1 */
     --primary-foreground: 0 0% 100%;
     
     --secondary: 0 0% 96%;                /* Light gray */
@@ -31,7 +31,7 @@
     --muted: 0 0% 96%;
     --muted-foreground: 0 0% 45%;         /* Medium gray */
     
-    --accent: 24 90% 50%;                 /* Subtle orange */
+    --accent: 239 84% 67%;                /* Indigo #6366F1 */
     --accent-foreground: 0 0% 100%;
     
     --destructive: 0 84% 60%;             /* Red */
@@ -39,7 +39,7 @@
     
     --border: 0 0% 90%;                   /* Light border */
     --input: 0 0% 90%;
-    --ring: 0 0% 9%;                      /* Black ring for focus */
+    --ring: 239 84% 67%;                  /* Indigo ring for focus */
     
     --radius: 0.75rem;
 
@@ -47,14 +47,14 @@
     --status-draft: 0 0% 45%;
     --status-draft-bg: 0 0% 96%;
     
-    --status-sent: 0 0% 9%;
-    --status-sent-bg: 0 0% 96%;
+    --status-sent: 239 84% 67%;
+    --status-sent-bg: 239 84% 97%;
     
     --status-viewed: 220 13% 46%;
     --status-viewed-bg: 220 14% 96%;
     
-    --status-overdue: 24 90% 50%;
-    --status-overdue-bg: 24 100% 96%;
+    --status-overdue: 0 84% 60%;
+    --status-overdue-bg: 0 100% 96%;
     
     --status-settled: 142 71% 45%;
     --status-settled-bg: 142 76% 95%;
@@ -207,7 +207,7 @@
     left: 0;
     right: 0;
     height: 2px;
-    background: hsl(var(--foreground));
+    background: hsl(var(--primary));
     transform: scaleX(0);
     transform-origin: left;
     transition: transform 0.3s ease;
@@ -226,8 +226,8 @@
   /* Grid pattern */
   .grid-pattern {
     background-image: 
-      linear-gradient(hsl(var(--foreground) / 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--foreground) / 0.03) 1px, transparent 1px);
+      linear-gradient(hsl(var(--foreground) / 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--foreground) / 0.04) 1px, transparent 1px);
     background-size: 48px 48px;
   }
 
