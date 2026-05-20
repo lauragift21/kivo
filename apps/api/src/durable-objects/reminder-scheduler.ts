@@ -4,7 +4,7 @@ import type { ReminderType } from '@kivo/shared';
 interface ReminderJob {
   invoice_id: string;
   reminder_type: ReminderType;
-  scheduled_at: number; // Unix timestamp in ms
+  scheduled_at: number;
   idempotency_key: string;
   sent: boolean;
 }
@@ -55,9 +55,6 @@ export class ReminderScheduler implements DurableObject {
     }
   }
 
-  /**
-   * Schedule reminders for an invoice
-   */
   private async handleSchedule(request: Request): Promise<Response> {
     const body = await request.json() as { invoice_id: string; due_date: string };
     const { invoice_id, due_date } = body;
@@ -65,13 +62,10 @@ export class ReminderScheduler implements DurableObject {
     const dueDateTime = new Date(due_date).getTime();
     const now = Date.now();
 
-    // Get existing state
     const state = await this.state.storage.get<ReminderState>('state') || { invoices: {} };
 
-    // Calculate reminder times
     const reminders: ReminderJob[] = [];
 
-    // Before due (3 days before)
     const beforeDueTime = dueDateTime - (DEFAULT_REMINDER_DAYS.before_due * 24 * 60 * 60 * 1000);
     if (beforeDueTime > now) {
       reminders.push({
@@ -83,7 +77,6 @@ export class ReminderScheduler implements DurableObject {
       });
     }
 
-    // On due date
     const onDueTime = dueDateTime;
     if (onDueTime > now) {
       reminders.push({
@@ -95,7 +88,6 @@ export class ReminderScheduler implements DurableObject {
       });
     }
 
-    // After due (7 days after)
     const afterDueTime = dueDateTime + (DEFAULT_REMINDER_DAYS.after_due * 24 * 60 * 60 * 1000);
     reminders.push({
       invoice_id,
@@ -105,7 +97,6 @@ export class ReminderScheduler implements DurableObject {
       sent: false,
     });
 
-    // Store invoice reminders
     state.invoices[invoice_id] = {
       invoice_id,
       due_date,
@@ -115,7 +106,6 @@ export class ReminderScheduler implements DurableObject {
 
     await this.state.storage.put('state', state);
 
-    // Schedule alarm for earliest reminder
     const nextReminder = reminders.find(r => !r.sent && r.scheduled_at > now);
     if (nextReminder) {
       await this.state.storage.setAlarm(nextReminder.scheduled_at);
@@ -126,9 +116,6 @@ export class ReminderScheduler implements DurableObject {
     });
   }
 
-  /**
-   * Cancel reminders for an invoice (e.g., when paid or voided)
-   */
   private async handleCancel(request: Request): Promise<Response> {
     const body = await request.json() as { invoice_id: string };
     const { invoice_id } = body;
@@ -145,9 +132,6 @@ export class ReminderScheduler implements DurableObject {
     });
   }
 
-  /**
-   * Process due reminders (called by alarm)
-   */
   async alarm(): Promise<void> {
     await this.processReminders();
   }
@@ -169,39 +153,29 @@ export class ReminderScheduler implements DurableObject {
       if (invoiceData.cancelled) continue;
 
       for (const reminder of invoiceData.reminders) {
-        // Skip already sent reminders
         if (reminder.sent) continue;
 
-        // Check if it's time to send
         if (reminder.scheduled_at <= now) {
           processed++;
 
-          // Check idempotency - query the database to see if this reminder was already sent
           const alreadySent = await this.checkReminderSent(invoiceId, reminder.idempotency_key);
 
           if (!alreadySent) {
-            // Send the reminder
             const success = await this.sendReminder(invoiceId, reminder.reminder_type);
 
             if (success) {
               sent++;
               reminder.sent = true;
-
-              // Record in database
               await this.recordReminderSent(invoiceId, reminder.reminder_type, reminder.idempotency_key);
             }
           } else {
-            // Mark as sent to avoid reprocessing
             reminder.sent = true;
           }
         }
       }
     }
 
-    // Save updated state
     await this.state.storage.put('state', state);
-
-    // Schedule next alarm
     await this.scheduleNextAlarm(state);
 
     return { processed, sent };
@@ -210,8 +184,8 @@ export class ReminderScheduler implements DurableObject {
   private async checkReminderSent(invoiceId: string, idempotencyKey: string): Promise<boolean> {
     try {
       const result = await this.env.DB.prepare(
-        `SELECT id FROM invoice_events 
-         WHERE invoice_id = ? AND event_type = 'reminder_sent' 
+        `SELECT id FROM invoice_events
+         WHERE invoice_id = ? AND event_type = 'reminder_sent'
          AND metadata LIKE ?`
       ).bind(invoiceId, `%${idempotencyKey}%`).first();
 
@@ -223,7 +197,6 @@ export class ReminderScheduler implements DurableObject {
 
   private async sendReminder(invoiceId: string, reminderType: ReminderType): Promise<boolean> {
     try {
-      // Get invoice details
       const invoice = await this.env.DB.prepare(
         `SELECT i.*, c.email as client_email, c.name as client_name
          FROM invoices i
@@ -235,12 +208,10 @@ export class ReminderScheduler implements DurableObject {
         return false;
       }
 
-      // Get settings
       const settings = await this.env.DB.prepare(
-        'SELECT * FROM settings WHERE user_id = ?'
-      ).bind(invoice.user_id).first();
+        'SELECT * FROM settings LIMIT 1'
+      ).first();
 
-      // Get public token
       const publicToken = await this.env.DB.prepare(
         'SELECT token FROM invoice_public_tokens WHERE invoice_id = ?'
       ).bind(invoiceId).first() as { token: string } | null;
@@ -251,7 +222,6 @@ export class ReminderScheduler implements DurableObject {
 
       const publicUrl = `${this.env.FRONTEND_URL}/invoice/${publicToken.token}`;
 
-      // Send email via Resend
       const fromEmail = this.env.FROM_EMAIL;
       const response = await fetch('https://api.resend.com/emails', {
         method: 'POST',

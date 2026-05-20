@@ -9,38 +9,10 @@ import {
   TIMEZONES,
 } from './constants';
 
-// ============ Auth Schemas ============
-
-export const emailSchema = z.string().email('Invalid email address');
-
-export const signUpSchema = z.object({
-  email: emailSchema,
-  name: z.string().min(1, 'Name is required').max(100),
-});
-
-export const signInSchema = z.object({
-  email: emailSchema,
-});
-
-export const verifyMagicLinkSchema = z.object({
-  token: z.string().min(1, 'Token is required'),
-});
-
-// ============ User Schemas ============
-
-export const userSchema = z.object({
-  id: z.string().uuid(),
-  email: z.string().email(),
-  name: z.string(),
-  created_at: z.string(),
-  updated_at: z.string(),
-});
-
 // ============ Client Schemas ============
 
 export const clientSchema = z.object({
   id: z.string().uuid(),
-  user_id: z.string().uuid(),
   name: z.string().min(1, 'Client name is required').max(200),
   email: z.string().email('Invalid email address'),
   company: z.string().max(200).nullable().optional(),
@@ -93,7 +65,6 @@ export const paymentTermsSchema = z.enum(PAYMENT_TERMS);
 
 export const invoiceSchema = z.object({
   id: z.string().uuid(),
-  user_id: z.string().uuid(),
   client_id: z.string().uuid(),
   invoice_number: z.string().min(1).max(50),
   status: invoiceStatusSchema,
@@ -183,7 +154,6 @@ export const paymentSchema = z.object({
 
 export const settingsSchema = z.object({
   id: z.string().uuid(),
-  user_id: z.string().uuid(),
   business_name: z.string().max(200).nullable().optional(),
   business_email: z.string().email().nullable().optional(),
   business_address: z.string().max(500).nullable().optional(),

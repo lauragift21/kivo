@@ -11,42 +11,44 @@ const settings = new Hono<{ Bindings: Env; Variables: Variables }>();
 settings.use('/*', authMiddleware);
 
 /**
- * Get user settings
+ * Ensure default settings exist (singleton pattern)
  */
-settings.get('/', async (c) => {
-  const userId = c.get('userId')!;
-  const requestId = c.get('requestId');
+async function ensureSettings(db: D1Database): Promise<Settings> {
+  let row = await db.prepare('SELECT * FROM settings LIMIT 1').first<Settings>();
 
-  let userSettings = await c.env.DB.prepare(
-    'SELECT * FROM settings WHERE user_id = ?'
-  ).bind(userId).first<Settings>();
-
-  // Create default settings if none exist
-  if (!userSettings) {
+  if (!row) {
+    const id = generateUUID();
     const now = new Date().toISOString();
-    const settingsId = generateUUID();
 
-    await c.env.DB.prepare(
-      `INSERT INTO settings (id, user_id, default_currency, default_payment_terms, timezone, invoice_prefix, next_invoice_number, created_at, updated_at)
-       VALUES (?, ?, 'USD', 'net_30', 'Europe/Amsterdam', 'INV', 1, ?, ?)`
-    ).bind(settingsId, userId, now, now).run();
+    await db.prepare(
+      `INSERT INTO settings (id, default_currency, default_payment_terms, timezone, invoice_prefix, next_invoice_number, created_at, updated_at)
+       VALUES (?, 'USD', 'net_30', 'Europe/Amsterdam', 'INV', 1, ?, ?)`
+    ).bind(id, now, now).run();
 
-    userSettings = await c.env.DB.prepare(
-      'SELECT * FROM settings WHERE id = ?'
-    ).bind(settingsId).first<Settings>();
+    row = await db.prepare('SELECT * FROM settings LIMIT 1').first<Settings>();
   }
 
+  return row!;
+}
+
+/**
+ * Get business settings
+ */
+settings.get('/', async (c) => {
+  const requestId = c.get('requestId');
+
+  const row = await ensureSettings(c.env.DB);
+
   return c.json({
-    data: userSettings,
+    data: row,
     requestId,
   });
 });
 
 /**
- * Update user settings
+ * Update business settings
  */
 settings.patch('/', async (c) => {
-  const userId = c.get('userId')!;
   const requestId = c.get('requestId');
 
   const body = await c.req.json();
@@ -59,22 +61,12 @@ settings.patch('/', async (c) => {
   const updates = result.data;
   const now = new Date().toISOString();
 
-  // Check if settings exist
-  let userSettings = await c.env.DB.prepare(
-    'SELECT id FROM settings WHERE user_id = ?'
-  ).bind(userId).first<{ id: string }>();
+  const existing = await c.env.DB.prepare('SELECT id FROM settings LIMIT 1').first<{ id: string }>();
 
-  if (!userSettings) {
-    // Create settings first
-    const settingsId = generateUUID();
-    await c.env.DB.prepare(
-      `INSERT INTO settings (id, user_id, default_currency, default_payment_terms, timezone, invoice_prefix, next_invoice_number, created_at, updated_at)
-       VALUES (?, ?, 'USD', 'net_30', 'Europe/Amsterdam', 'INV', 1, ?, ?)`
-    ).bind(settingsId, userId, now, now).run();
-    userSettings = { id: settingsId };
+  if (!existing) {
+    await ensureSettings(c.env.DB);
   }
 
-  // Build dynamic update query
   const fields: string[] = ['updated_at = ?'];
   const values: any[] = [now];
 
@@ -111,18 +103,14 @@ settings.patch('/', async (c) => {
     values.push(updates.invoice_prefix);
   }
 
-  values.push(userId);
-
   await c.env.DB.prepare(
-    `UPDATE settings SET ${fields.join(', ')} WHERE user_id = ?`
+    `UPDATE settings SET ${fields.join(', ')}`
   ).bind(...values).run();
 
-  const updatedSettings = await c.env.DB.prepare(
-    'SELECT * FROM settings WHERE user_id = ?'
-  ).bind(userId).first<Settings>();
+  const updated = await c.env.DB.prepare('SELECT * FROM settings LIMIT 1').first<Settings>();
 
   return c.json({
-    data: updatedSettings,
+    data: updated,
     requestId,
   });
 });
@@ -131,7 +119,6 @@ settings.patch('/', async (c) => {
  * Upload business logo
  */
 settings.post('/logo', async (c) => {
-  const userId = c.get('userId')!;
   const requestId = c.get('requestId');
 
   const formData = await c.req.formData();
@@ -141,38 +128,30 @@ settings.post('/logo', async (c) => {
     throw new ValidationError('No logo file provided');
   }
 
-  // Cast to File - we've verified it's not a string above
   const file = fileEntry as unknown as File;
 
-  // Validate file type
   const allowedTypes = ['image/png', 'image/jpeg', 'image/svg+xml'];
   if (!allowedTypes.includes(file.type)) {
     throw new ValidationError('Invalid file type. Allowed: PNG, JPEG, SVG');
   }
 
-  // Validate file size (max 2MB)
   if (file.size > 2 * 1024 * 1024) {
     throw new ValidationError('File size must be less than 2MB');
   }
 
-  // Determine file extension
   const ext = file.type === 'image/svg+xml' ? 'svg' : file.type === 'image/png' ? 'png' : 'jpg';
-  const key = `${userId}/branding/logo.${ext}`;
+  const key = `branding/logo.${ext}`;
 
-  // Upload to R2
   await c.env.STORAGE.put(key, await file.arrayBuffer(), {
-    httpMetadata: {
-      contentType: file.type,
-    },
+    httpMetadata: { contentType: file.type },
   });
 
   const logoUrl = `${c.env.API_URL}/api/settings/logo`;
   const now = new Date().toISOString();
 
-  // Update settings with logo URL
   await c.env.DB.prepare(
-    'UPDATE settings SET logo_url = ?, updated_at = ? WHERE user_id = ?'
-  ).bind(logoUrl, now, userId).run();
+    'UPDATE settings SET logo_url = ?, updated_at = ?'
+  ).bind(logoUrl, now).run();
 
   return c.json({
     data: {
@@ -187,15 +166,12 @@ settings.post('/logo', async (c) => {
  * Get business logo
  */
 settings.get('/logo', async (c) => {
-  const userId = c.get('userId')!;
-
-  // Try different extensions
   const extensions = ['png', 'jpg', 'svg'];
   let logo = null;
   let contentType = '';
 
   for (const ext of extensions) {
-    const key = `${userId}/branding/logo.${ext}`;
+    const key = `branding/logo.${ext}`;
     logo = await c.env.STORAGE.get(key);
     if (logo) {
       contentType = ext === 'svg' ? 'image/svg+xml' : ext === 'png' ? 'image/png' : 'image/jpeg';
@@ -219,22 +195,19 @@ settings.get('/logo', async (c) => {
  * Delete business logo
  */
 settings.delete('/logo', async (c) => {
-  const userId = c.get('userId')!;
   const requestId = c.get('requestId');
 
-  // Try to delete all possible extensions
   const extensions = ['png', 'jpg', 'svg'];
   for (const ext of extensions) {
-    const key = `${userId}/branding/logo.${ext}`;
+    const key = `branding/logo.${ext}`;
     await c.env.STORAGE.delete(key);
   }
 
   const now = new Date().toISOString();
 
-  // Update settings to remove logo URL
   await c.env.DB.prepare(
-    'UPDATE settings SET logo_url = NULL, updated_at = ? WHERE user_id = ?'
-  ).bind(now, userId).run();
+    'UPDATE settings SET logo_url = NULL, updated_at = ?'
+  ).bind(now).run();
 
   return c.json({
     data: { message: 'Logo deleted successfully' },

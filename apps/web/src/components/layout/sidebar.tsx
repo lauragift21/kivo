@@ -4,7 +4,6 @@ import {
   Users,
   FileText,
   Settings,
-  LogOut,
   Menu,
   X,
 } from 'lucide-react';
@@ -12,17 +11,11 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/ui/logo';
-import { useAuth } from '@/lib/auth';
 
 /**
- * Kivo Sidebar Component
- * 
- * Brand: "Kivo - Invoicing that fits how you work."
- * 
- * Design principles:
- * - Clean, minimal navigation
- * - Subtle active states
- * - Generous whitespace
+ * Kivo Sidebar - Single Tenant
+ *
+ * No user auth section. Clean, minimal navigation.
  */
 
 const navigation = [
@@ -35,7 +28,6 @@ const navigation = [
 export function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
-  const { user, signOut } = useAuth();
 
   const isActive = (href: string) => {
     if (href === '/dashboard') return location.pathname === '/dashboard';
@@ -103,30 +95,11 @@ export function Sidebar() {
             })}
           </nav>
 
-          {/* User section */}
+          {/* Footer */}
           <div className="p-4 border-t">
-            <div className="flex items-center gap-3 px-3 py-2 mb-2">
-              <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
-                <span className="text-sm font-medium text-secondary-foreground">
-                  {user?.name?.charAt(0).toUpperCase() || 'U'}
-                </span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">{user?.name}</p>
-                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
-              </div>
-            </div>
-            <Button
-              variant="ghost"
-              className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
-              onClick={() => {
-                signOut();
-                setMobileOpen(false);
-              }}
-            >
-              <LogOut className="h-5 w-5" />
-              Sign out
-            </Button>
+            <p className="text-xs text-muted-foreground px-3">
+              Kivo Self-Hosted
+            </p>
           </div>
         </div>
       </aside>

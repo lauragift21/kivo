@@ -8,7 +8,6 @@ import type {
   Settings,
   UpdateSettings,
   DashboardData,
-  User,
   PublicInvoiceData,
   PaginatedResponse,
 } from '@kivo/shared';
@@ -29,8 +28,7 @@ class ApiError extends Error {
 
 async function handleResponse<T>(response: Response): Promise<T> {
   const contentType = response.headers.get('content-type');
-  
-  // Check if response is JSON
+
   if (!contentType || !contentType.includes('application/json')) {
     const text = await response.text();
     throw new ApiError(
@@ -50,7 +48,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
       response.status
     );
   }
-  
+
   if (!response.ok) {
     throw new ApiError(
       data.error?.code || 'UNKNOWN_ERROR',
@@ -59,83 +57,33 @@ async function handleResponse<T>(response: Response): Promise<T> {
       data.error?.details
     );
   }
-  
+
   return data.data as T;
 }
 
-function getAuthHeaders(): HeadersInit {
-  const token = localStorage.getItem('auth_token');
-  return {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
+function getHeaders(json = true): HeadersInit {
+  if (json) {
+    return { 'Content-Type': 'application/json' };
+  }
+  return {};
 }
-
-// Auth API
-export const authApi = {
-  signUp: async (email: string, name: string): Promise<{ message: string }> => {
-    const response = await fetch(`${API_BASE}/auth/signup`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, name }),
-    });
-    return handleResponse(response);
-  },
-
-  signIn: async (email: string): Promise<{ message: string }> => {
-    const response = await fetch(`${API_BASE}/auth/signin`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    });
-    return handleResponse(response);
-  },
-
-  verify: async (token: string): Promise<{ user: User; token: string; expires_at: string }> => {
-    const response = await fetch(`${API_BASE}/auth/verify`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token }),
-    });
-    return handleResponse(response);
-  },
-
-  me: async (): Promise<{ user: User }> => {
-    const response = await fetch(`${API_BASE}/auth/me`, {
-      headers: getAuthHeaders(),
-    });
-    return handleResponse(response);
-  },
-
-  signOut: async (): Promise<void> => {
-    await fetch(`${API_BASE}/auth/signout`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-    });
-    localStorage.removeItem('auth_token');
-  },
-};
 
 // Clients API
 export const clientsApi = {
   list: async (archived = false): Promise<Client[]> => {
-    const response = await fetch(`${API_BASE}/clients?archived=${archived}`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await fetch(`${API_BASE}/clients?archived=${archived}`);
     return handleResponse(response);
   },
 
   get: async (id: string): Promise<Client> => {
-    const response = await fetch(`${API_BASE}/clients/${id}`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await fetch(`${API_BASE}/clients/${id}`);
     return handleResponse(response);
   },
 
   create: async (data: CreateClient): Promise<Client> => {
     const response = await fetch(`${API_BASE}/clients`, {
       method: 'POST',
-      headers: getAuthHeaders(),
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
     return handleResponse(response);
@@ -144,7 +92,7 @@ export const clientsApi = {
   update: async (id: string, data: UpdateClient): Promise<Client> => {
     const response = await fetch(`${API_BASE}/clients/${id}`, {
       method: 'PATCH',
-      headers: getAuthHeaders(),
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
     return handleResponse(response);
@@ -153,7 +101,7 @@ export const clientsApi = {
   archive: async (id: string): Promise<void> => {
     const response = await fetch(`${API_BASE}/clients/${id}`, {
       method: 'DELETE',
-      headers: getAuthHeaders(),
+      headers: getHeaders(),
     });
     return handleResponse(response);
   },
@@ -161,7 +109,7 @@ export const clientsApi = {
   restore: async (id: string): Promise<Client> => {
     const response = await fetch(`${API_BASE}/clients/${id}/restore`, {
       method: 'POST',
-      headers: getAuthHeaders(),
+      headers: getHeaders(),
     });
     return handleResponse(response);
   },
@@ -185,11 +133,9 @@ export const invoicesApi = {
     if (params?.page) searchParams.set('page', params.page.toString());
     if (params?.limit) searchParams.set('limit', params.limit.toString());
 
-    const response = await fetch(`${API_BASE}/invoices?${searchParams}`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await fetch(`${API_BASE}/invoices?${searchParams}`);
     const result = await response.json();
-    
+
     if (!response.ok) {
       throw new ApiError(
         result.error?.code || 'UNKNOWN_ERROR',
@@ -198,7 +144,7 @@ export const invoicesApi = {
         result.error?.details
       );
     }
-    
+
     return {
       data: result.data,
       pagination: result.pagination,
@@ -206,16 +152,14 @@ export const invoicesApi = {
   },
 
   get: async (id: string): Promise<Invoice & { client: Client; items: any[]; events: any[]; payments: any[] }> => {
-    const response = await fetch(`${API_BASE}/invoices/${id}`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await fetch(`${API_BASE}/invoices/${id}`);
     return handleResponse(response);
   },
 
   create: async (data: CreateInvoice): Promise<Invoice> => {
     const response = await fetch(`${API_BASE}/invoices`, {
       method: 'POST',
-      headers: getAuthHeaders(),
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
     return handleResponse(response);
@@ -224,7 +168,7 @@ export const invoicesApi = {
   update: async (id: string, data: UpdateInvoice): Promise<Invoice> => {
     const response = await fetch(`${API_BASE}/invoices/${id}`, {
       method: 'PATCH',
-      headers: getAuthHeaders(),
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
     return handleResponse(response);
@@ -233,7 +177,7 @@ export const invoicesApi = {
   send: async (id: string): Promise<{ message: string; public_url: string }> => {
     const response = await fetch(`${API_BASE}/invoices/${id}/send`, {
       method: 'POST',
-      headers: getAuthHeaders(),
+      headers: getHeaders(),
     });
     return handleResponse(response);
   },
@@ -241,7 +185,7 @@ export const invoicesApi = {
   duplicate: async (id: string): Promise<Invoice> => {
     const response = await fetch(`${API_BASE}/invoices/${id}/duplicate`, {
       method: 'POST',
-      headers: getAuthHeaders(),
+      headers: getHeaders(),
     });
     return handleResponse(response);
   },
@@ -249,14 +193,13 @@ export const invoicesApi = {
   generatePdf: async (id: string): Promise<{ message: string; pdf_key: string }> => {
     const response = await fetch(`${API_BASE}/invoices/${id}/pdf`, {
       method: 'POST',
-      headers: getAuthHeaders(),
+      headers: getHeaders(),
     });
     return handleResponse(response);
   },
 
   getPdfUrl: (id: string): string => {
-    const token = localStorage.getItem('auth_token');
-    return `${API_BASE}/invoices/${id}/pdf${token ? `?token=${token}` : ''}`;
+    return `${API_BASE}/invoices/${id}/pdf`;
   },
 };
 
@@ -279,16 +222,12 @@ export const publicApi = {
 // Dashboard API
 export const dashboardApi = {
   get: async (): Promise<DashboardData> => {
-    const response = await fetch(`${API_BASE}/dashboard`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await fetch(`${API_BASE}/dashboard`);
     return handleResponse(response);
   },
 
   getStats: async (): Promise<{ monthly: any[]; by_status: any[] }> => {
-    const response = await fetch(`${API_BASE}/dashboard/stats`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await fetch(`${API_BASE}/dashboard/stats`);
     return handleResponse(response);
   },
 };
@@ -296,16 +235,14 @@ export const dashboardApi = {
 // Settings API
 export const settingsApi = {
   get: async (): Promise<Settings> => {
-    const response = await fetch(`${API_BASE}/settings`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await fetch(`${API_BASE}/settings`);
     return handleResponse(response);
   },
 
   update: async (data: UpdateSettings): Promise<Settings> => {
     const response = await fetch(`${API_BASE}/settings`, {
       method: 'PATCH',
-      headers: getAuthHeaders(),
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
     return handleResponse(response);
@@ -314,11 +251,9 @@ export const settingsApi = {
   uploadLogo: async (file: File): Promise<{ message: string; logo_url: string }> => {
     const formData = new FormData();
     formData.append('logo', file);
-    
-    const token = localStorage.getItem('auth_token');
+
     const response = await fetch(`${API_BASE}/settings/logo`, {
       method: 'POST',
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
       body: formData,
     });
     return handleResponse(response);
@@ -327,7 +262,7 @@ export const settingsApi = {
   deleteLogo: async (): Promise<void> => {
     const response = await fetch(`${API_BASE}/settings/logo`, {
       method: 'DELETE',
-      headers: getAuthHeaders(),
+      headers: getHeaders(),
     });
     return handleResponse(response);
   },

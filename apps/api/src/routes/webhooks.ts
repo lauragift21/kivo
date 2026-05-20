@@ -41,24 +41,21 @@ webhooks.post('/stripe', async (c) => {
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session;
       const invoiceId = session.metadata?.invoice_id;
-      
+
       if (!invoiceId) {
         logger.warn('No invoice_id in session metadata');
         break;
       }
 
-      // Update payment record
       await c.env.DB.prepare(
-        `UPDATE payments 
+        `UPDATE payments
          SET stripe_payment_intent_id = ?, status = 'succeeded', paid_at = ?
          WHERE stripe_checkout_session_id = ?`
       ).bind(session.payment_intent, now, session.id).run();
 
-      // Update invoice status
       const invoice = await c.env.DB.prepare(
-        'SELECT user_id, invoice_number, total, currency, client_id FROM invoices WHERE id = ?'
+        'SELECT invoice_number, total, currency, client_id FROM invoices WHERE id = ?'
       ).bind(invoiceId).first<{
-        user_id: string;
         invoice_number: string;
         total: number;
         currency: string;
@@ -74,7 +71,6 @@ webhooks.post('/stripe', async (c) => {
         "UPDATE invoices SET status = 'paid', updated_at = ? WHERE id = ?"
       ).bind(now, invoiceId).run();
 
-      // Log event
       await c.env.DB.prepare(
         `INSERT INTO invoice_events (id, invoice_id, event_type, metadata, created_at)
          VALUES (?, ?, 'paid', ?, ?)`
@@ -88,27 +84,24 @@ webhooks.post('/stripe', async (c) => {
         now
       ).run();
 
-      // Cancel reminders
-      const reminderDOId = c.env.REMINDER_SCHEDULER.idFromName(invoice.user_id);
+      const reminderDOId = c.env.REMINDER_SCHEDULER.idFromName('default');
       const reminderDO = c.env.REMINDER_SCHEDULER.get(reminderDOId);
-      
+
       await reminderDO.fetch('http://internal/cancel', {
         method: 'POST',
         body: JSON.stringify({ invoice_id: invoiceId }),
       });
 
-      // Track analytics
       const analytics = new AnalyticsService();
-      analytics.trackInvoicePaid(invoice.user_id, invoiceId, invoice.total, invoice.currency);
+      analytics.trackInvoicePaid(invoiceId, invoice.total, invoice.currency);
 
-      // Send payment receipt
       const client = await c.env.DB.prepare(
         'SELECT email FROM clients WHERE id = ?'
       ).bind(invoice.client_id).first<{ email: string }>();
 
       const settings = await c.env.DB.prepare(
-        'SELECT business_name, email_from_name FROM settings WHERE user_id = ?'
-      ).bind(invoice.user_id).first<{ business_name: string; email_from_name: string }>();
+        'SELECT business_name, email_from_name FROM settings LIMIT 1'
+      ).first<{ business_name: string; email_from_name: string }>();
 
       if (client) {
         const emailService = new EmailService(c.env.RESEND_API_KEY, c.env.FROM_EMAIL);
@@ -129,25 +122,19 @@ webhooks.post('/stripe', async (c) => {
 
     case 'checkout.session.expired': {
       const session = event.data.object as Stripe.Checkout.Session;
-      
-      // Update payment record to cancelled
       await c.env.DB.prepare(
         `UPDATE payments SET status = 'failed' WHERE stripe_checkout_session_id = ?`
       ).bind(session.id).run();
-
       logger.info('Checkout session expired', { sessionId: session.id });
       break;
     }
 
     case 'payment_intent.payment_failed': {
       const paymentIntent = event.data.object as Stripe.PaymentIntent;
-      
-      // Update payment record
       await c.env.DB.prepare(
         `UPDATE payments SET status = 'failed' WHERE stripe_payment_intent_id = ?`
       ).bind(paymentIntent.id).run();
 
-      // Log event
       const payment = await c.env.DB.prepare(
         'SELECT invoice_id FROM payments WHERE stripe_payment_intent_id = ?'
       ).bind(paymentIntent.id).first<{ invoice_id: string }>();

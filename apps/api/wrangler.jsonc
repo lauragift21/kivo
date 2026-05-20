@@ -3,33 +3,29 @@
   "main": "src/index.ts",
   "compatibility_date": "2024-01-15",
   "compatibility_flags": ["nodejs_compat"],
-  
-  // Static assets (web frontend)
+
   "assets": {
     "directory": "../web/dist",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
     "run_worker_first": ["/api/*", "/health"]
   },
-  
-  // D1 Database
+
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "kivo-db",
-      "database_id": "c37a2427-9210-46f6-b2aa-293f0629947b"
+      "database_id": "replace-with-your-database-id"
     }
   ],
-  
-  // R2 Bucket for PDF storage
+
   "r2_buckets": [
     {
       "binding": "STORAGE",
       "bucket_name": "kivo-storage"
     }
   ],
-  
-  // Durable Objects for reminder scheduling
+
   "durable_objects": {
     "bindings": [
       {
@@ -38,22 +34,19 @@
       }
     ]
   },
-  
-  // Cron Triggers for periodic reconciliation
+
   "triggers": {
     "crons": ["*/5 * * * *"]
   },
-  
-  // Environment variables (set via wrangler secret)
+
   "vars": {
     "ENVIRONMENT": "production",
-    "FRONTEND_URL": "https://kivo.lauragift.workers.dev",
-    "API_URL": "https://kivo.lauragift.workers.dev",
-    "FROM_EMAIL": "noreply@thegiftcode.dev",
-    "CF_ACCOUNT_ID": "20d70bbc30c928fa3f30d3669ff13331"
+    "FRONTEND_URL": "https://your-domain.workers.dev",
+    "API_URL": "https://your-domain.workers.dev",
+    "FROM_EMAIL": "noreply@your-domain.com",
+    "CF_ACCOUNT_ID": "your-cloudflare-account-id"
   },
-  
-  // Migrations for Durable Objects
+
   "migrations": [
     {
       "tag": "v1",

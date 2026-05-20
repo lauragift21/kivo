@@ -407,7 +407,6 @@ export class PDFService {
    * Store PDF in R2
    */
   async storePDF(
-    userId: string,
     invoiceId: string,
     invoiceNumber: string,
     pdfData: ArrayBuffer,
@@ -415,7 +414,7 @@ export class PDFService {
   ): Promise<string> {
     const extension = isPdf ? 'pdf' : 'html';
     const contentType = isPdf ? 'application/pdf' : 'text/html';
-    const key = `${userId}/invoices/${invoiceId}/${invoiceNumber}.${extension}`;
+    const key = `invoices/${invoiceId}/${invoiceNumber}.${extension}`;
     
     await this.storage.put(key, pdfData, {
       httpMetadata: {
@@ -431,11 +430,10 @@ export class PDFService {
    * Get PDF from R2
    * Tries PDF first, then falls back to HTML for legacy files
    */
-  async getPDF(userId: string, invoiceId: string, invoiceNumber: string): Promise<PDFResult | null> {
-    // Try PDF first
-    const pdfKey = `${userId}/invoices/${invoiceId}/${invoiceNumber}.pdf`;
+  async getPDF(invoiceId: string, invoiceNumber: string): Promise<PDFResult | null> {
+    const pdfKey = `invoices/${invoiceId}/${invoiceNumber}.pdf`;
     let file = await this.storage.get(pdfKey);
-    
+
     if (file) {
       return {
         body: file.body,
@@ -444,8 +442,7 @@ export class PDFService {
       };
     }
 
-    // Fall back to HTML for legacy files
-    const htmlKey = `${userId}/invoices/${invoiceId}/${invoiceNumber}.html`;
+    const htmlKey = `invoices/${invoiceId}/${invoiceNumber}.html`;
     file = await this.storage.get(htmlKey);
     
     if (file) {
@@ -462,9 +459,9 @@ export class PDFService {
   /**
    * Delete PDF from R2 (both PDF and HTML versions)
    */
-  async deletePDF(userId: string, invoiceId: string, invoiceNumber: string): Promise<void> {
-    const pdfKey = `${userId}/invoices/${invoiceId}/${invoiceNumber}.pdf`;
-    const htmlKey = `${userId}/invoices/${invoiceId}/${invoiceNumber}.html`;
+  async deletePDF(invoiceId: string, invoiceNumber: string): Promise<void> {
+    const pdfKey = `invoices/${invoiceId}/${invoiceNumber}.pdf`;
+    const htmlKey = `invoices/${invoiceId}/${invoiceNumber}.html`;
     
     await Promise.all([
       this.storage.delete(pdfKey),

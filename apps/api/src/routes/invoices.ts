@@ -17,16 +17,14 @@ import { AnalyticsService } from '../services/analytics';
 
 const invoices = new Hono<{ Bindings: Env; Variables: Variables }>();
 
-// All invoice routes require authentication
 invoices.use('/*', authMiddleware);
 
 /**
  * List invoices with filtering and pagination
  */
 invoices.get('/', async (c) => {
-  const userId = c.get('userId')!;
   const requestId = c.get('requestId');
-  
+
   const query = c.req.query();
   const result = invoiceFilterSchema.safeParse({
     status: query.status || undefined,
@@ -44,9 +42,8 @@ invoices.get('/', async (c) => {
   const filters = result.data;
   const offset = (filters.page - 1) * filters.limit;
 
-  // Build dynamic query
-  let whereClause = 'user_id = ?';
-  const params: any[] = [userId];
+  let whereClause = '1=1';
+  const params: any[] = [];
 
   if (filters.status) {
     whereClause += ' AND status = ?';
@@ -65,19 +62,17 @@ invoices.get('/', async (c) => {
     params.push(filters.date_to);
   }
 
-  // Get total count
   const countResult = await c.env.DB.prepare(
     `SELECT COUNT(*) as count FROM invoices WHERE ${whereClause}`
   ).bind(...params).first<{ count: number }>();
 
   const total = countResult?.count || 0;
 
-  // Get invoices with client info
   const invoicesResult = await c.env.DB.prepare(
     `SELECT i.*, c.name as client_name, c.email as client_email, c.company as client_company
      FROM invoices i
      LEFT JOIN clients c ON i.client_id = c.id
-     WHERE i.${whereClause}
+     WHERE ${whereClause}
      ORDER BY i.created_at DESC
      LIMIT ? OFFSET ?`
   ).bind(...params, filters.limit, offset).all();
@@ -98,34 +93,29 @@ invoices.get('/', async (c) => {
  * Get a single invoice with items and client
  */
 invoices.get('/:id', async (c) => {
-  const userId = c.get('userId')!;
   const requestId = c.get('requestId');
   const invoiceId = c.req.param('id');
 
   const invoice = await c.env.DB.prepare(
-    'SELECT * FROM invoices WHERE id = ? AND user_id = ?'
-  ).bind(invoiceId, userId).first<Invoice>();
+    'SELECT * FROM invoices WHERE id = ?'
+  ).bind(invoiceId).first<Invoice>();
 
   if (!invoice) {
     throw new NotFoundError('Invoice');
   }
 
-  // Get client
   const client = await c.env.DB.prepare(
     'SELECT id, name, email, company, address FROM clients WHERE id = ?'
   ).bind(invoice.client_id).first();
 
-  // Get items
   const items = await c.env.DB.prepare(
     'SELECT * FROM invoice_items WHERE invoice_id = ? ORDER BY sort_order'
   ).bind(invoiceId).all<InvoiceItem>();
 
-  // Get events
   const events = await c.env.DB.prepare(
     'SELECT * FROM invoice_events WHERE invoice_id = ? ORDER BY created_at DESC'
   ).bind(invoiceId).all();
 
-  // Get payments
   const payments = await c.env.DB.prepare(
     'SELECT * FROM payments WHERE invoice_id = ? ORDER BY created_at DESC'
   ).bind(invoiceId).all();
@@ -146,33 +136,29 @@ invoices.get('/:id', async (c) => {
  * Create a new invoice
  */
 invoices.post('/', async (c) => {
-  const userId = c.get('userId')!;
   const requestId = c.get('requestId');
-  
+
   const body = await c.req.json();
   const result = createInvoiceSchema.safeParse(body);
-  
+
   if (!result.success) {
     throw new ValidationError('Invalid input', result.error.flatten());
   }
 
   const data = result.data;
 
-  // Verify client belongs to user
   const client = await c.env.DB.prepare(
-    'SELECT id FROM clients WHERE id = ? AND user_id = ? AND archived = 0'
-  ).bind(data.client_id, userId).first();
+    'SELECT id FROM clients WHERE id = ? AND archived = 0'
+  ).bind(data.client_id).first();
 
   if (!client) {
     throw new NotFoundError('Client');
   }
 
-  // Get user settings for invoice number
   const settings = await c.env.DB.prepare(
-    'SELECT * FROM settings WHERE user_id = ?'
-  ).bind(userId).first<Settings>();
+    'SELECT * FROM settings LIMIT 1'
+  ).first<Settings>();
 
-  // Calculate totals
   const totals = calculateInvoiceTotals(
     data.items,
     data.discount_type,
@@ -182,32 +168,28 @@ invoices.post('/', async (c) => {
   const invoiceId = generateUUID();
   const now = new Date().toISOString();
 
-  // Generate invoice number if not provided or empty
   let invoiceNumber = data.invoice_number?.trim();
   if (!invoiceNumber && settings) {
     invoiceNumber = generateInvoiceNumber(settings.invoice_prefix, settings.next_invoice_number);
-    // Update next invoice number
     await c.env.DB.prepare(
-      'UPDATE settings SET next_invoice_number = next_invoice_number + 1, updated_at = ? WHERE user_id = ?'
-    ).bind(now, userId).run();
+      'UPDATE settings SET next_invoice_number = next_invoice_number + 1, updated_at = ?'
+    ).bind(now).run();
   }
 
-  // Insert invoice
   await c.env.DB.prepare(
     `INSERT INTO invoices (
-      id, user_id, client_id, invoice_number, status, issue_date, due_date,
+      id, client_id, invoice_number, status, issue_date, due_date,
       currency, subtotal, tax_total, discount_type, discount_value, discount_amount,
       total, notes, payment_terms, reminders_enabled, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ) VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(
-    invoiceId, userId, data.client_id, invoiceNumber, data.issue_date, data.due_date,
+    invoiceId, data.client_id, invoiceNumber, data.issue_date, data.due_date,
     data.currency, totals.subtotal, totals.tax_total, data.discount_type || null,
     data.discount_value || null, totals.discount_amount, totals.total,
     data.notes || null, data.payment_terms || null, data.reminders_enabled !== false ? 1 : 0,
     now, now
   ).run();
 
-  // Insert items
   for (let i = 0; i < data.items.length; i++) {
     const item = data.items[i];
     const itemId = generateUUID();
@@ -219,17 +201,14 @@ invoices.post('/', async (c) => {
     ).bind(itemId, invoiceId, item.description, item.quantity, item.unit_price, item.tax_rate || null, itemAmount, i).run();
   }
 
-  // Create invoice event
   await c.env.DB.prepare(
     `INSERT INTO invoice_events (id, invoice_id, event_type, created_at)
      VALUES (?, ?, 'created', ?)`
   ).bind(generateUUID(), invoiceId, now).run();
 
-  // Track analytics
   const analytics = new AnalyticsService();
-  analytics.trackInvoiceCreated(userId, invoiceId, totals.total, data.currency);
+  analytics.trackInvoiceCreated(invoiceId, totals.total, data.currency);
 
-  // Fetch complete invoice
   const invoice = await getInvoiceWithDetails(c.env.DB, invoiceId);
 
   return c.json({
@@ -242,23 +221,20 @@ invoices.post('/', async (c) => {
  * Update an invoice
  */
 invoices.patch('/:id', async (c) => {
-  const userId = c.get('userId')!;
   const requestId = c.get('requestId');
   const invoiceId = c.req.param('id');
 
-  // Check invoice exists and belongs to user
   const existingInvoice = await c.env.DB.prepare(
-    'SELECT * FROM invoices WHERE id = ? AND user_id = ?'
-  ).bind(invoiceId, userId).first<Invoice>();
+    'SELECT * FROM invoices WHERE id = ?'
+  ).bind(invoiceId).first<Invoice>();
 
   if (!existingInvoice) {
     throw new NotFoundError('Invoice');
   }
 
-  // Can only edit draft invoices (or update status)
   const body = await c.req.json();
   const result = updateInvoiceSchema.safeParse(body);
-  
+
   if (!result.success) {
     throw new ValidationError('Invalid input', result.error.flatten());
   }
@@ -266,7 +242,6 @@ invoices.patch('/:id', async (c) => {
   const data = result.data;
   const now = new Date().toISOString();
 
-  // If updating items, recalculate totals
   if (data.items && existingInvoice.status !== 'draft') {
     throw new ValidationError('Cannot modify items on a non-draft invoice');
   }
@@ -279,12 +254,10 @@ invoices.patch('/:id', async (c) => {
       data.discount_value ?? existingInvoice.discount_value
     );
 
-    // Delete existing items
     await c.env.DB.prepare(
       'DELETE FROM invoice_items WHERE invoice_id = ?'
     ).bind(invoiceId).run();
 
-    // Insert new items
     for (let i = 0; i < data.items.length; i++) {
       const item = data.items[i];
       const itemId = generateUUID();
@@ -297,7 +270,6 @@ invoices.patch('/:id', async (c) => {
     }
   }
 
-  // Build update query
   const fields: string[] = ['updated_at = ?'];
   const values: any[] = [now];
 
@@ -351,13 +323,12 @@ invoices.patch('/:id', async (c) => {
     values.push(totals.subtotal, totals.tax_total, totals.discount_amount, totals.total);
   }
 
-  values.push(invoiceId, userId);
+  values.push(invoiceId);
 
   await c.env.DB.prepare(
-    `UPDATE invoices SET ${fields.join(', ')} WHERE id = ? AND user_id = ?`
+    `UPDATE invoices SET ${fields.join(', ')} WHERE id = ?`
   ).bind(...values).run();
 
-  // Log event if status changed
   if (data.status && data.status !== existingInvoice.status) {
     await c.env.DB.prepare(
       `INSERT INTO invoice_events (id, invoice_id, event_type, metadata, created_at)
@@ -371,7 +342,6 @@ invoices.patch('/:id', async (c) => {
     ).run();
   }
 
-  // Fetch complete invoice
   const invoice = await getInvoiceWithDetails(c.env.DB, invoiceId);
 
   return c.json({
@@ -384,14 +354,12 @@ invoices.patch('/:id', async (c) => {
  * Send invoice to client
  */
 invoices.post('/:id/send', async (c) => {
-  const userId = c.get('userId')!;
   const requestId = c.get('requestId');
   const invoiceId = c.req.param('id');
 
-  // Get invoice with client
   const invoice = await c.env.DB.prepare(
-    'SELECT * FROM invoices WHERE id = ? AND user_id = ?'
-  ).bind(invoiceId, userId).first<Invoice>();
+    'SELECT * FROM invoices WHERE id = ?'
+  ).bind(invoiceId).first<Invoice>();
 
   if (!invoice) {
     throw new NotFoundError('Invoice');
@@ -410,12 +378,11 @@ invoices.post('/:id/send', async (c) => {
   }
 
   const settings = await c.env.DB.prepare(
-    'SELECT * FROM settings WHERE user_id = ?'
-  ).bind(userId).first<Settings>();
+    'SELECT * FROM settings LIMIT 1'
+  ).first<Settings>();
 
   const now = new Date().toISOString();
 
-  // Create or get public token
   let publicToken = await c.env.DB.prepare(
     'SELECT token FROM invoice_public_tokens WHERE invoice_id = ?'
   ).bind(invoiceId).first<{ token: string }>();
@@ -431,7 +398,6 @@ invoices.post('/:id/send', async (c) => {
 
   const publicUrl = `${c.env.FRONTEND_URL}/invoice/${publicToken.token}`;
 
-  // Send email
   const emailService = new EmailService(c.env.RESEND_API_KEY, c.env.FROM_EMAIL);
   await emailService.sendInvoice(
     client.email,
@@ -444,27 +410,22 @@ invoices.post('/:id/send', async (c) => {
     settings?.email_from_name || undefined
   );
 
-  // Update invoice status
   await c.env.DB.prepare(
     "UPDATE invoices SET status = 'sent', updated_at = ? WHERE id = ?"
   ).bind(now, invoiceId).run();
 
-  // Log event
   await c.env.DB.prepare(
     `INSERT INTO invoice_events (id, invoice_id, event_type, metadata, created_at)
      VALUES (?, ?, 'sent', ?, ?)`
   ).bind(generateUUID(), invoiceId, JSON.stringify({ email: client.email }), now).run();
 
-  // Track analytics
   const analytics = new AnalyticsService();
-  analytics.trackInvoiceSent(userId, invoiceId);
+  analytics.trackInvoiceSent(invoiceId);
 
-  // Schedule reminders if enabled
   if (invoice.reminders_enabled) {
-    // Get Durable Object for reminder scheduling
-    const reminderDOId = c.env.REMINDER_SCHEDULER.idFromName(userId);
+    const reminderDOId = c.env.REMINDER_SCHEDULER.idFromName('default');
     const reminderDO = c.env.REMINDER_SCHEDULER.get(reminderDOId);
-    
+
     await reminderDO.fetch('http://internal/schedule', {
       method: 'POST',
       body: JSON.stringify({
@@ -487,52 +448,47 @@ invoices.post('/:id/send', async (c) => {
  * Duplicate an invoice
  */
 invoices.post('/:id/duplicate', async (c) => {
-  const userId = c.get('userId')!;
   const requestId = c.get('requestId');
   const invoiceId = c.req.param('id');
 
   const original = await getInvoiceWithDetails(c.env.DB, invoiceId);
 
-  if (!original || original.user_id !== userId) {
+  if (!original) {
     throw new NotFoundError('Invoice');
   }
 
-  // Get settings for new invoice number
   const settings = await c.env.DB.prepare(
-    'SELECT * FROM settings WHERE user_id = ?'
-  ).bind(userId).first<Settings>();
+    'SELECT * FROM settings LIMIT 1'
+  ).first<Settings>();
 
   const newInvoiceId = generateUUID();
   const now = new Date().toISOString();
   const today = now.split('T')[0];
 
-  // Generate new invoice number
   const newInvoiceNumber = settings
     ? generateInvoiceNumber(settings.invoice_prefix, settings.next_invoice_number)
     : `INV-${Date.now()}`;
 
   if (settings) {
     await c.env.DB.prepare(
-      'UPDATE settings SET next_invoice_number = next_invoice_number + 1, updated_at = ? WHERE user_id = ?'
-    ).bind(now, userId).run();
+      'UPDATE settings SET next_invoice_number = next_invoice_number + 1, updated_at = ?'
+    ).bind(now).run();
   }
 
-  // Create new invoice as draft
   await c.env.DB.prepare(
     `INSERT INTO invoices (
-      id, user_id, client_id, invoice_number, status, issue_date, due_date,
+      id, client_id, invoice_number, status, issue_date, due_date,
       currency, subtotal, tax_total, discount_type, discount_value, discount_amount,
       total, notes, payment_terms, reminders_enabled, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ) VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(
-    newInvoiceId, userId, original.client_id, newInvoiceNumber, today, original.due_date,
+    newInvoiceId, original.client_id, newInvoiceNumber, today, original.due_date,
     original.currency, original.subtotal, original.tax_total, original.discount_type,
     original.discount_value, original.discount_amount, original.total,
     original.notes, original.payment_terms, original.reminders_enabled ? 1 : 0,
     now, now
   ).run();
 
-  // Copy items
   for (const item of original.items) {
     await c.env.DB.prepare(
       `INSERT INTO invoice_items (id, invoice_id, description, quantity, unit_price, tax_rate, amount, sort_order)
@@ -540,7 +496,6 @@ invoices.post('/:id/duplicate', async (c) => {
     ).bind(generateUUID(), newInvoiceId, item.description, item.quantity, item.unit_price, item.tax_rate, item.amount, item.sort_order).run();
   }
 
-  // Log event
   await c.env.DB.prepare(
     `INSERT INTO invoice_events (id, invoice_id, event_type, metadata, created_at)
      VALUES (?, ?, 'created', ?, ?)`
@@ -558,32 +513,28 @@ invoices.post('/:id/duplicate', async (c) => {
  * Generate/regenerate PDF for invoice
  */
 invoices.post('/:id/pdf', async (c) => {
-  const userId = c.get('userId')!;
   const requestId = c.get('requestId');
   const invoiceId = c.req.param('id');
 
   const invoice = await getInvoiceWithDetails(c.env.DB, invoiceId);
 
-  if (!invoice || invoice.user_id !== userId) {
+  if (!invoice) {
     throw new NotFoundError('Invoice');
   }
 
   const settings = await c.env.DB.prepare(
-    'SELECT * FROM settings WHERE user_id = ?'
-  ).bind(userId).first<Settings>();
+    'SELECT * FROM settings LIMIT 1'
+  ).first<Settings>();
 
   if (!settings) {
-    throw new ValidationError('User settings not found. Please configure your business settings first.');
+    throw new ValidationError('Business settings not found. Please configure your business settings first.');
   }
 
-  // Generate PDF using Browser Rendering API (falls back to HTML)
   const pdfService = new PDFService(c.env.STORAGE, c.env.CF_ACCOUNT_ID, c.env.CF_API_TOKEN);
   const { data: pdfData, isPdf } = await pdfService.generateInvoicePDF(invoice as InvoiceWithClient, settings);
-  
-  // Store PDF (or HTML fallback)
-  const pdfKey = await pdfService.storePDF(userId, invoiceId, invoice.invoice_number, pdfData, isPdf);
 
-  // Update invoice
+  const pdfKey = await pdfService.storePDF(invoiceId, invoice.invoice_number, pdfData, isPdf);
+
   const now = new Date().toISOString();
   await c.env.DB.prepare(
     'UPDATE invoices SET pdf_generated_at = ?, updated_at = ? WHERE id = ?'
@@ -601,22 +552,20 @@ invoices.post('/:id/pdf', async (c) => {
 
 /**
  * Get PDF download URL
- * Supports both Authorization header and query param token for direct browser access
  */
 invoices.get('/:id/pdf', async (c) => {
-  const userId = c.get('userId')!;
   const invoiceId = c.req.param('id');
 
   const invoice = await c.env.DB.prepare(
-    'SELECT invoice_number FROM invoices WHERE id = ? AND user_id = ?'
-  ).bind(invoiceId, userId).first<{ invoice_number: string }>();
+    'SELECT invoice_number FROM invoices WHERE id = ?'
+  ).bind(invoiceId).first<{ invoice_number: string }>();
 
   if (!invoice) {
     throw new NotFoundError('Invoice');
   }
 
   const pdfService = new PDFService(c.env.STORAGE, c.env.CF_ACCOUNT_ID, c.env.CF_API_TOKEN);
-  const pdf = await pdfService.getPDF(userId, invoiceId, invoice.invoice_number);
+  const pdf = await pdfService.getPDF(invoiceId, invoice.invoice_number);
 
   if (!pdf) {
     throw new NotFoundError('PDF');

@@ -1,11 +1,7 @@
 import { createRouter, createRoute, createRootRoute, Outlet, redirect } from '@tanstack/react-router';
 
 // Pages
-import { LandingPage } from '@/pages/landing';
 import { DashboardPage } from '@/pages/dashboard';
-import { SignInPage } from '@/pages/auth/signin';
-import { SignUpPage } from '@/pages/auth/signup';
-import { VerifyPage } from '@/pages/auth/verify';
 import { ClientsListPage } from '@/pages/clients/list';
 import { ClientFormPage } from '@/pages/clients/form';
 import { InvoicesListPage } from '@/pages/invoices/list';
@@ -21,69 +17,31 @@ const rootRoute = createRootRoute({
   component: () => <Outlet />,
 });
 
-// Auth routes (public)
-const authRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: 'auth',
-  component: () => <Outlet />,
-});
-
-const signInRoute = createRoute({
-  getParentRoute: () => authRoute,
-  path: 'signin',
-  beforeLoad: ({ context }) => {
-    const { auth } = context as { auth: { isAuthenticated: boolean } };
-    if (auth.isAuthenticated) {
-      throw redirect({
-        to: '/dashboard',
-      });
-    }
-  },
-  component: SignInPage,
-});
-
-const signUpRoute = createRoute({
-  getParentRoute: () => authRoute,
-  path: 'signup',
-  beforeLoad: ({ context }) => {
-    const { auth } = context as { auth: { isAuthenticated: boolean } };
-    if (auth.isAuthenticated) {
-      throw redirect({
-        to: '/dashboard',
-      });
-    }
-  },
-  component: SignUpPage,
-});
-
-const verifyRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: 'auth/verify',
-  component: VerifyPage,
-});
-
-// Landing page (public)
-const landingRoute = createRoute({
+// Redirect root to dashboard
+const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: LandingPage,
+  beforeLoad: () => {
+    throw redirect({ to: '/dashboard' });
+  },
+  component: DashboardPage,
 });
 
-// Privacy page (public)
+// Privacy page
 const privacyRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: 'privacy',
   component: PrivacyPage,
 });
 
-// Terms page (public)
+// Terms page
 const termsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: 'terms',
   component: TermsPage,
 });
 
-// Public invoice route (no auth required)
+// Public invoice route
 const publicInvoiceRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: 'invoice/$token',
@@ -93,31 +51,16 @@ const publicInvoiceRoute = createRoute({
   }),
 });
 
-// Protected routes wrapper - redirects to signin if not authenticated
-const protectedRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  id: 'protected',
-  beforeLoad: ({ context }) => {
-    const { auth } = context as { auth: { isAuthenticated: boolean } };
-    if (!auth.isAuthenticated) {
-      throw redirect({
-        to: '/auth/signin',
-      });
-    }
-  },
-  component: () => <Outlet />,
-});
-
 // Dashboard
 const dashboardRoute = createRoute({
-  getParentRoute: () => protectedRoute,
+  getParentRoute: () => rootRoute,
   path: '/dashboard',
   component: DashboardPage,
 });
 
 // Clients routes
 const clientsRoute = createRoute({
-  getParentRoute: () => protectedRoute,
+  getParentRoute: () => rootRoute,
   path: 'clients',
   component: () => <Outlet />,
 });
@@ -142,7 +85,7 @@ const clientsEditRoute = createRoute({
 
 // Invoices routes
 const invoicesRoute = createRoute({
-  getParentRoute: () => protectedRoute,
+  getParentRoute: () => rootRoute,
   path: 'invoices',
   component: () => <Outlet />,
 });
@@ -173,25 +116,21 @@ const invoicesEditRoute = createRoute({
 
 // Settings route
 const settingsRoute = createRoute({
-  getParentRoute: () => protectedRoute,
+  getParentRoute: () => rootRoute,
   path: 'settings',
   component: SettingsPage,
 });
 
 // Build route tree
 const routeTree = rootRoute.addChildren([
-  landingRoute,
+  indexRoute,
   privacyRoute,
   termsRoute,
-  verifyRoute,
-  authRoute.addChildren([signInRoute, signUpRoute]),
   publicInvoiceRoute,
-  protectedRoute.addChildren([
-    dashboardRoute,
-    clientsRoute.addChildren([clientsIndexRoute, clientsNewRoute, clientsEditRoute]),
-    invoicesRoute.addChildren([invoicesIndexRoute, invoicesNewRoute, invoicesDetailRoute, invoicesEditRoute]),
-    settingsRoute,
-  ]),
+  dashboardRoute,
+  clientsRoute.addChildren([clientsIndexRoute, clientsNewRoute, clientsEditRoute]),
+  invoicesRoute.addChildren([invoicesIndexRoute, invoicesNewRoute, invoicesDetailRoute, invoicesEditRoute]),
+  settingsRoute,
 ]);
 
 // Create router

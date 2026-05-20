@@ -10,7 +10,6 @@ import { PDFService } from '../services/pdf';
 
 const publicRoutes = new Hono<{ Bindings: Env; Variables: Variables }>();
 
-// Apply rate limiting
 publicRoutes.use('/*', publicInvoiceRateLimiter);
 
 /**
@@ -20,7 +19,6 @@ publicRoutes.get('/invoice/:token', async (c) => {
   const requestId = c.get('requestId');
   const token = c.req.param('token');
 
-  // Find invoice by public token
   const tokenRecord = await c.env.DB.prepare(
     'SELECT invoice_id FROM invoice_public_tokens WHERE token = ?'
   ).bind(token).first<{ invoice_id: string }>();
@@ -42,17 +40,16 @@ publicRoutes.get('/invoice/:token', async (c) => {
   ).bind(invoice.client_id).first<Partial<Client>>();
 
   const settings = await c.env.DB.prepare(
-    'SELECT business_name, business_email, business_address, logo_url FROM settings WHERE user_id = ?'
-  ).bind(invoice.user_id).first<Partial<Settings>>();
+    'SELECT business_name, business_email, business_address, logo_url FROM settings LIMIT 1'
+  ).first<Partial<Settings>>();
 
   const items = await c.env.DB.prepare(
     'SELECT description, quantity, unit_price, tax_rate, amount FROM invoice_items WHERE invoice_id = ? ORDER BY sort_order'
   ).bind(invoice.id).all<Partial<InvoiceItem>>();
 
-  // Mark as viewed if currently sent
   if (invoice.status === 'sent') {
     const now = new Date().toISOString();
-    
+
     await c.env.DB.prepare(
       "UPDATE invoices SET status = 'viewed', updated_at = ? WHERE id = ?"
     ).bind(now, invoice.id).run();
@@ -62,15 +59,12 @@ publicRoutes.get('/invoice/:token', async (c) => {
        VALUES (?, ?, 'viewed', ?)`
     ).bind(generateUUID(), invoice.id, now).run();
 
-    // Track analytics
     const analytics = new AnalyticsService();
-    analytics.trackInvoiceViewed(invoice.user_id, invoice.id);
+    analytics.trackInvoiceViewed(invoice.id);
   }
 
-  // Determine if payment is possible
   const canPay = ['sent', 'viewed', 'overdue'].includes(invoice.status);
 
-  // Get PDF URL if exists
   let pdfUrl = null;
   if (invoice.pdf_generated_at) {
     pdfUrl = `${c.env.API_URL}/api/public/invoice/${token}/pdf`;
@@ -117,7 +111,6 @@ publicRoutes.get('/invoice/:token', async (c) => {
 publicRoutes.get('/invoice/:token/pdf', async (c) => {
   const token = c.req.param('token');
 
-  // Find invoice by public token
   const tokenRecord = await c.env.DB.prepare(
     'SELECT invoice_id FROM invoice_public_tokens WHERE token = ?'
   ).bind(token).first<{ invoice_id: string }>();
@@ -127,15 +120,15 @@ publicRoutes.get('/invoice/:token/pdf', async (c) => {
   }
 
   const invoice = await c.env.DB.prepare(
-    'SELECT user_id, invoice_number, pdf_generated_at FROM invoices WHERE id = ?'
-  ).bind(tokenRecord.invoice_id).first<{ user_id: string; invoice_number: string; pdf_generated_at: string | null }>();
+    'SELECT invoice_number, pdf_generated_at FROM invoices WHERE id = ?'
+  ).bind(tokenRecord.invoice_id).first<{ invoice_number: string; pdf_generated_at: string | null }>();
 
   if (!invoice || !invoice.pdf_generated_at) {
     throw new NotFoundError('PDF');
   }
 
   const pdfService = new PDFService(c.env.STORAGE, c.env.CF_ACCOUNT_ID, c.env.CF_API_TOKEN);
-  const pdf = await pdfService.getPDF(invoice.user_id, tokenRecord.invoice_id, invoice.invoice_number);
+  const pdf = await pdfService.getPDF(tokenRecord.invoice_id, invoice.invoice_number);
 
   if (!pdf) {
     throw new NotFoundError('PDF');
@@ -156,7 +149,6 @@ publicRoutes.post('/invoice/:token/pay', async (c) => {
   const requestId = c.get('requestId');
   const token = c.req.param('token');
 
-  // Find invoice by public token
   const tokenRecord = await c.env.DB.prepare(
     'SELECT invoice_id FROM invoice_public_tokens WHERE token = ?'
   ).bind(token).first<{ invoice_id: string }>();
@@ -173,7 +165,6 @@ publicRoutes.post('/invoice/:token/pay', async (c) => {
     throw new NotFoundError('Invoice');
   }
 
-  // Check if invoice can be paid
   if (!['sent', 'viewed', 'overdue'].includes(invoice.status)) {
     return c.json({
       error: {
@@ -189,8 +180,8 @@ publicRoutes.post('/invoice/:token/pay', async (c) => {
   ).bind(invoice.client_id).first<{ email: string }>();
 
   const settings = await c.env.DB.prepare(
-    'SELECT business_name FROM settings WHERE user_id = ?'
-  ).bind(invoice.user_id).first<{ business_name: string }>();
+    'SELECT business_name FROM settings LIMIT 1'
+  ).first<{ business_name: string }>();
 
   const stripeService = new StripeService(c.env.STRIPE_SECRET_KEY, c.env.STRIPE_WEBHOOK_SECRET);
 
@@ -208,7 +199,6 @@ publicRoutes.post('/invoice/:token/pay', async (c) => {
     settings?.business_name
   );
 
-  // Create pending payment record
   const now = new Date().toISOString();
   await c.env.DB.prepare(
     `INSERT INTO payments (id, invoice_id, stripe_checkout_session_id, amount, currency, status, created_at)
@@ -229,18 +219,18 @@ publicRoutes.post('/invoice/:token/pay', async (c) => {
  */
 publicRoutes.get('/demo-video', async (c) => {
   const videoKey = 'demo/kivo.mp4';
-  
+
   const object = await c.env.STORAGE.get(videoKey);
-  
+
   if (!object) {
     throw new NotFoundError('Demo video');
   }
 
   const headers = new Headers();
   headers.set('Content-Type', 'video/mp4');
-  headers.set('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+  headers.set('Cache-Control', 'public, max-age=31536000');
   headers.set('Accept-Ranges', 'bytes');
-  
+
   return new Response(object.body, { headers });
 });
 

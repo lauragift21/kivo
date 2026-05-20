@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import {
-  userSchema,
   clientSchema,
   createClientSchema,
   updateClientSchema,
@@ -18,9 +17,6 @@ import {
   invoiceFilterSchema,
   reminderSchema,
   apiErrorSchema,
-  signUpSchema,
-  signInSchema,
-  verifyMagicLinkSchema,
   createInvoiceItemSchema,
 } from './schemas';
 import {
@@ -35,7 +31,6 @@ import {
 
 // ============ Inferred Types ============
 
-export type User = z.infer<typeof userSchema>;
 export type Client = z.infer<typeof clientSchema>;
 export type CreateClient = z.infer<typeof createClientSchema>;
 export type UpdateClient = z.infer<typeof updateClientSchema>;
@@ -59,10 +54,6 @@ export type InvoiceFilter = z.infer<typeof invoiceFilterSchema>;
 export type Reminder = z.infer<typeof reminderSchema>;
 
 export type ApiError = z.infer<typeof apiErrorSchema>;
-
-export type SignUp = z.infer<typeof signUpSchema>;
-export type SignIn = z.infer<typeof signInSchema>;
-export type VerifyMagicLink = z.infer<typeof verifyMagicLinkSchema>;
 
 // ============ Enum Types ============
 
@@ -89,24 +80,6 @@ export interface PaginatedResponse<T> {
 export interface ApiResponse<T> {
   data: T;
   requestId: string;
-}
-
-// ============ Auth Types ============
-
-export interface AuthSession {
-  user: User;
-  token: string;
-  expires_at: string;
-}
-
-export interface MagicLinkToken {
-  id: string;
-  user_id: string | null;
-  email: string;
-  token: string;
-  expires_at: string;
-  used_at: string | null;
-  created_at: string;
 }
 
 // ============ Dashboard Types ============
@@ -187,7 +160,6 @@ export interface ReminderState {
 
 export interface AnalyticsEvent {
   event: string;
-  user_id: string;
   properties: Record<string, unknown>;
   timestamp: string;
 }

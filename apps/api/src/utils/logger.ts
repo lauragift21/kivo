@@ -1,18 +1,17 @@
 import type { StructuredLog } from '../types';
 
-export function createLogger(requestId?: string, userId?: string) {
+export function createLogger(requestId?: string) {
   const log = (level: StructuredLog['level'], message: string, data?: Record<string, unknown>) => {
     const entry: StructuredLog = {
       level,
       message,
       timestamp: new Date().toISOString(),
       requestId,
-      userId,
       ...data,
     };
-    
+
     const output = JSON.stringify(entry);
-    
+
     switch (level) {
       case 'error':
         console.error(output);

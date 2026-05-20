@@ -17,11 +17,11 @@ export { ReminderScheduler } from './durable-objects/reminder-scheduler';
 
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
 
-// Global error handler (must come before routes)
+// Global error handler
 app.onError((err, c) => {
   const requestId = c.get('requestId') || 'unknown';
   const appErr = err as Error & { code?: string; statusCode?: number; details?: unknown };
-  
+
   if (appErr.statusCode && appErr.code) {
     return c.json({
       error: {
@@ -32,7 +32,7 @@ app.onError((err, c) => {
       requestId,
     }, appErr.statusCode as 400 | 401 | 403 | 404 | 409 | 429 | 500 | 502);
   }
-  
+
   const isDevelopment = c.env.ENVIRONMENT === 'development';
   return c.json({
     error: {
@@ -47,7 +47,7 @@ app.onError((err, c) => {
 app.use('*', requestIdMiddleware);
 app.use('*', errorHandlerMiddleware);
 
-// CORS - apply dynamically based on env
+// CORS
 app.use('*', async (c, next) => {
   const corsMiddleware = createCorsMiddleware(c.env);
   return corsMiddleware(c, next);
@@ -67,11 +67,10 @@ app.route('/api/webhooks', webhooks);
 app.route('/api/dashboard', dashboard);
 app.route('/api/settings', settings);
 
-// 404 handler for API routes only
+// 404 handler
 app.notFound((c) => {
   const url = new URL(c.req.url);
-  
-  // Only return JSON 404 for /api/* routes
+
   if (url.pathname.startsWith('/api/')) {
     return c.json(
       {
@@ -84,46 +83,42 @@ app.notFound((c) => {
       404
     );
   }
-  
-  // For non-API routes, this shouldn't be reached as static assets handle them
-  // But as a fallback, serve index.html for SPA routing
+
   return c.env.ASSETS.fetch(new Request(new URL('/index.html', c.req.url), c.req.raw));
 });
 
-// Cron trigger handler for periodic reconciliation
+// Cron trigger handler
 async function handleScheduledEvent(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
   const logger = createLogger();
   logger.info('Cron trigger started', { cron: event.cron });
 
   try {
-    // Update overdue invoices
     const now = new Date();
     const today = now.toISOString().split('T')[0];
 
     const overdueResult = await env.DB.prepare(
-      `UPDATE invoices 
+      `UPDATE invoices
        SET status = 'overdue', updated_at = ?
        WHERE status IN ('sent', 'viewed') AND due_date < ?`
     ).bind(now.toISOString(), today).run();
 
     logger.info('Updated overdue invoices', { count: overdueResult.meta.changes });
 
-    // Get all users with pending reminders
-    const usersWithReminders = await env.DB.prepare(
-      `SELECT DISTINCT user_id FROM invoices 
-       WHERE status IN ('sent', 'viewed', 'overdue') 
-       AND reminders_enabled = 1`
-    ).all<{ user_id: string }>();
+    const hasReminders = await env.DB.prepare(
+      `SELECT 1 FROM invoices
+       WHERE status IN ('sent', 'viewed', 'overdue')
+       AND reminders_enabled = 1
+       LIMIT 1`
+    ).first();
 
-    // Trigger reminder processing for each user's Durable Object
-    for (const { user_id } of usersWithReminders.results) {
-      const reminderDOId = env.REMINDER_SCHEDULER.idFromName(user_id);
+    if (hasReminders) {
+      const reminderDOId = env.REMINDER_SCHEDULER.idFromName('default');
       const reminderDO = env.REMINDER_SCHEDULER.get(reminderDOId);
 
       ctx.waitUntil(
         reminderDO.fetch('http://internal/process', { method: 'POST' })
           .catch((error) => {
-            logger.error('Failed to process reminders for user', error as Error, { user_id });
+            logger.error('Failed to process reminders', error as Error);
           })
       );
     }
